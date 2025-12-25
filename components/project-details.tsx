@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import {
   BookOpen,
@@ -343,9 +344,7 @@ const FeaturesSection = () => (
         key={i}
         className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
       >
-        <div
-          className={`bg-linear-to-r ${section.color} text-white px-6 py-4`}
-        >
+        <div className={`bg-linear-to-r ${section.color} text-white px-6 py-4`}>
           <h2 className="text-xl font-bold">{section.title}</h2>
         </div>
         <div className="p-6">
@@ -795,12 +794,10 @@ const DatabaseSection = () => (
                 key={j}
                 className="flex items-start gap-4 p-3 bg-gray-50 rounded-lg font-mono text-sm"
               >
-                <span className="font-bold text-gray-900 min-w-[140px]">
+                <span className="font-bold text-gray-900 min-w-35">
                   {field.name}
                 </span>
-                <span className="text-indigo-600 min-w-[120px]">
-                  {field.type}
-                </span>
+                <span className="text-indigo-600 min-w-30">{field.type}</span>
                 <span className="text-gray-600 flex-1">{field.desc}</span>
               </div>
             ))}
@@ -1265,9 +1262,7 @@ const APISection = () => (
         key={i}
         className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
       >
-        <div
-          className={`bg-linear-to-r ${section.color} text-white px-6 py-4`}
-        >
+        <div className={`bg-linear-to-r ${section.color} text-white px-6 py-4`}>
           <h3 className="text-xl font-bold">{section.group}</h3>
         </div>
         <div className="p-6">
