@@ -16,24 +16,6 @@ export function generateInviteCode(length: number = 8): string {
   return code;
 }
 
-export function calculateStreak(lastActive: Date): number {
-  const now = new Date();
-  const lastActiveDate = new Date(lastActive);
-  
-  // Reset time to midnight for accurate day comparison
-  now.setHours(0, 0, 0, 0);
-  lastActiveDate.setHours(0, 0, 0, 0);
-  
-  const diffTime = now.getTime() - lastActiveDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  
-  // If last active was today or yesterday, maintain streak
-  if (diffDays <= 1) {
-    return 1; // Streak continues
-  }
-  
-  return 0; // Streak broken
-}
 
 export function calculateMastery(attempts: any[]): number {
   if (attempts.length === 0) return 0;
@@ -69,4 +51,68 @@ export function getSubjectColor(subject: string): string {
   };
   
   return colors[subject.toLowerCase()] || 'bg-gray-500';
+}
+
+
+export function calculateStreak(attempts: any[]): number {
+  if (attempts.length === 0) return 0;
+
+  // Sort attempts by date
+  const sortedAttempts = [...attempts].sort(
+    (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+  );
+
+  let streak = 0;
+  let currentDate = new Date();
+  currentDate.setHours(0, 0, 0, 0);
+
+  for (const attempt of sortedAttempts) {
+    const attemptDate = new Date(attempt.completedAt);
+    attemptDate.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor(
+      (currentDate.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays === streak || (streak === 0 && diffDays === 0)) {
+      streak++;
+      currentDate = attemptDate;
+    } else if (diffDays > streak + 1) {
+      break;
+    }
+  }
+
+  return streak;
+}
+
+export function calculateMasteryBySubject(attempts: any[]): any[] {
+  const subjectStats: Record<string, { scores: number[]; attempts: number }> = {};
+
+  attempts.forEach((attempt: any) => {
+    const quiz = attempt.quizId;
+    if (!quiz) return;
+
+    const subject = quiz.subject;
+    if (!subjectStats[subject]) {
+      subjectStats[subject] = { scores: [], attempts: 0 };
+    }
+
+    subjectStats[subject].scores.push(attempt.score);
+    subjectStats[subject].attempts++;
+  });
+
+  return Object.entries(subjectStats).map(([subject, data]) => {
+    // Calculate mastery as weighted average of recent attempts
+    const recentScores = data.scores.slice(-5); // Last 5 attempts
+    const mastery = Math.round(
+      recentScores.reduce((sum, score) => sum + score, 0) / recentScores.length
+    );
+
+    return {
+      subject,
+      mastery: isNaN(mastery) ? 0 : mastery,
+      attempts: data.attempts,
+      recentScore: data.scores[data.scores.length - 1] || 0,
+    };
+  });
 }

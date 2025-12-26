@@ -4,9 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import QuizAttempt from '@/models/QuizAttempt';
-import Quiz from '@/models/Quiz';
 import User from '@/models/User';
-import { calculateMastery } from '@/lib/utils';
+import { calculateStreak, calculateMasteryBySubject } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   const authResult = await verifyAuth(request);
@@ -21,6 +20,7 @@ export async function GET(request: NextRequest) {
   try {
     await connectDB();
 
+
     // Get all attempts
     const attempts = await QuizAttempt.find({ userId: authResult.userId })
       .populate('quizId')
@@ -32,24 +32,39 @@ export async function GET(request: NextRequest) {
       ? Math.round(attempts.reduce((sum, a) => sum + a.score, 0) / attempts.length)
       : 0;
 
-    // Get mastery by subject
-    const subjectStats: Record<string, any[]> = {};
-    
-    for (const attempt of attempts) {
-      const quiz = attempt.quizId as any;
-      if (!quiz) continue;
-      
-      if (!subjectStats[quiz.subject]) {
-        subjectStats[quiz.subject] = [];
-      }
-      subjectStats[quiz.subject].push(attempt);
-    }
+    // Calculate streak
+    const streak = calculateStreak(attempts);
 
-    const masteryBySubject = Object.entries(subjectStats).map(([subject, subjectAttempts]) => ({
-      subject,
-      mastery: calculateMastery(subjectAttempts),
-      attempts: subjectAttempts.length,
-    }));
+    // Calculate longest streak
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let lastDate: Date | null = null;
+
+    attempts.forEach((attempt) => {
+      const attemptDate = new Date(attempt.completedAt);
+      attemptDate.setHours(0, 0, 0, 0);
+
+      if (!lastDate) {
+        tempStreak = 1;
+      } else {
+        const diffDays = Math.floor(
+          (lastDate.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        if (diffDays === 1) {
+          tempStreak++;
+        } else {
+          longestStreak = Math.max(longestStreak, tempStreak);
+          tempStreak = 1;
+        }
+      }
+
+      lastDate = attemptDate;
+    });
+    longestStreak = Math.max(longestStreak, tempStreak);
+
+    // Get mastery by subject
+    const masteryBySubject = calculateMasteryBySubject(attempts);
 
     // Get user data
     const user = await User.findById(authResult.userId);
@@ -59,7 +74,8 @@ export async function GET(request: NextRequest) {
       stats: {
         totalQuizzes: totalAttempts,
         avgAccuracy,
-        streak: user?.streak || 0,
+        streak,
+        longestStreak,
         totalXP: user?.totalXP || 0,
         masteryBySubject,
       },
