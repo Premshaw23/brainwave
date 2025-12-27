@@ -1,9 +1,9 @@
 // components/community/PostCard.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Heart, MessageCircle, Share2, Trophy, Brain, Calendar } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Brain, Calendar, Bookmark } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,31 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
   const [liked, setLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [liking, setLiking] = useState(false);
+
+  // Bookmark state
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    // Fetch bookmarks and set initial state
+    const fetchBookmarks = async () => {
+      try {
+        const token = localStorage.getItem('authToken');
+        const response = await fetch('/api/bookmarks', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        console.log('[PostCard] GET /api/bookmarks response:', data);
+        if (data.success && Array.isArray(data.bookmarks)) {
+          // bookmarks can be array of posts or post ids
+          const ids = data.bookmarks.map((b: any) => String(b._id || b));
+          setBookmarked(ids.includes(String(post._id)));
+        }
+      } catch (err) {
+        console.error('[PostCard] Error fetching bookmarks:', err);
+      }
+    };
+    fetchBookmarks();
+  }, [post._id]);
 
   const handleLike = async () => {
     if (liking) return;
@@ -79,6 +104,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
       <CardContent className="p-6">
         {/* Author Header */}
         <div className="flex items-center gap-3 mb-4">
+
           <Link href={`/profile/${post.author._id}`}>
             <Avatar className="cursor-pointer">
               <AvatarImage src={post.author.avatar} />
@@ -96,11 +122,45 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
             <div className="flex items-center gap-2 text-xs text-gray-500">
               <Calendar className="w-3 h-3" />
               {formatTimeAgo(post.createdAt)}
+              {/* Bookmark Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={liking}
+                onClick={async () => {
+                  setLiking(true);
+                  try {
+                    const token = localStorage.getItem('authToken');
+                    const response = await fetch('/api/bookmarks', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ postId: post._id }),
+                    });
+                    const data = await response.json();
+                    console.log('[PostCard] POST /api/bookmarks response:', data);
+                    if (data.success) {
+                      setBookmarked(data.isBookmarked);
+                    } else {
+                      console.error('[PostCard] Bookmark API error:', data);
+                    }
+                  } catch (err) {
+                    console.error('[PostCard] Error updating bookmark:', err);
+                  } finally {
+                    setLiking(false);
+                  }
+                }}
+                className={bookmarked ? 'text-indigo-600' : 'text-gray-600'}
+              >
+                <Bookmark className="w-4 h-4" fill={bookmarked ? 'currentColor' : 'none'} />
+              </Button>
             </div>
+            <Badge variant="outline" className="capitalize">
+              {post.contentType}
+            </Badge>
           </div>
-          <Badge variant="outline" className="capitalize">
-            {post.contentType}
-          </Badge>
         </div>
 
         {/* Caption */}

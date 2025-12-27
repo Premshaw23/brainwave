@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import Post from '@/models/Post';
+import { createNotification } from '@/lib/notifications';
+import User from '@/models/User';
 
 export async function POST(
   request: NextRequest,
@@ -53,6 +55,18 @@ export async function POST(
     await post.populate('comments.userId', 'displayName avatar');
 
     const newComment = post.comments[post.comments.length - 1];
+
+    // Notification logic: only notify if not commenting on own post
+    if (String(post.userId) !== String(authResult.userId)) {
+      const currentUser = await User.findById(authResult.userId);
+      await createNotification({
+        userId: post.userId.toString(),
+        type: 'comment',
+        title: 'New Comment',
+        message: `${currentUser.displayName} commented on your post`,
+        link: `/community/${post._id}`,
+      });
+    }
 
     return NextResponse.json({
       success: true,

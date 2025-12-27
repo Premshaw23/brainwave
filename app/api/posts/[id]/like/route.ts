@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import Post from '@/models/Post';
+import { createNotification } from '@/lib/notifications';
+import User from '@/models/User';
 
 export async function POST(
   request: NextRequest,
@@ -33,15 +35,29 @@ export async function POST(
 
     const userIndex = post.likes.indexOf(authResult.userId);
 
+    let liked = false;
     if (userIndex > -1) {
       // Unlike
       post.likes.splice(userIndex, 1);
     } else {
       // Like
       post.likes.push(authResult.userId);
+      liked = true;
     }
 
     await post.save();
+
+    // Notification logic: only notify if just liked (not unliked) and not liking own post
+    if (liked && String(post.userId) !== String(authResult.userId)) {
+      const currentUser = await User.findById(authResult.userId);
+      await createNotification({
+        userId: post.userId.toString(),
+        type: 'like',
+        title: 'New Like',
+        message: `${currentUser.displayName} liked your post`,
+        link: `/community/${post._id}`,
+      });
+    }
 
     return NextResponse.json({
       success: true,

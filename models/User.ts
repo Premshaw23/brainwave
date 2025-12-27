@@ -11,6 +11,7 @@ export interface IUser extends Document {
   lastActive: Date;
   totalXP: number;
   createdAt: Date;
+  bookmarks: mongoose.Types.ObjectId[];
 }
 
 const UserSchema = new Schema<IUser>({
@@ -22,7 +23,8 @@ const UserSchema = new Schema<IUser>({
   streak: { type: Number, default: 0 },
   lastActive: { type: Date, default: Date.now },
   totalXP: { type: Number, default: 0 },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  bookmarks: [{ type: Schema.Types.ObjectId, ref: 'Post' }],
 });
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

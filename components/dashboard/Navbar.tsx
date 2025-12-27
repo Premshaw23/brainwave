@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, Search, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import NotificationBell from '@/components/NotificationBell';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 
@@ -233,11 +234,7 @@ export default function Navbar() {
 
       {/* Right side */}
       <div className="flex items-center gap-4">
-        <button className="relative rounded-lg p-2 hover:bg-gray-100">
-          <Bell className="w-5 h-5 text-gray-600" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-        </button>
-
+        <NotificationBell />
         <div className="flex items-center gap-3">
           <Avatar>
             <AvatarImage src={user?.avatar} />
