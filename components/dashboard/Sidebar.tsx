@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut } from 'lucide-react';
+import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut, CreditCard } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Notes', href: '/notes', icon: FileText },
   { name: 'Quizzes', href: '/quizzes', icon: Brain },
+  { name: 'Flashcards', href: '/flashcards', icon: CreditCard }, // ⭐ ADD THIS
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Study Groups', href: '/groups', icon: Users },
   { name: 'Community', href: '/community', icon: MessageSquare },

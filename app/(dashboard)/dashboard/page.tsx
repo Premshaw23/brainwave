@@ -123,7 +123,7 @@ export default function DashboardPage() {
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Link href="/notes">
             <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-indigo-500 hover:bg-indigo-50">
               <Brain className="w-6 h-6 text-indigo-600" />
@@ -134,6 +134,13 @@ export default function DashboardPage() {
             <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-green-500 hover:bg-green-50">
               <Target className="w-6 h-6 text-green-600" />
               <span className="font-medium">Take Quiz</span>
+            </Button>
+          </Link>
+          <Link href="/flashcards">
+            <Button variant="outline" className="w-full h-24 flex flex-col gap-2 hover:border-purple-500 hover:bg-purple-50">
+              {/* CreditCard icon for flashcards */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+              <span className="font-medium">Study Flashcards</span>
             </Button>
           </Link>
           <Link href="/analytics">
