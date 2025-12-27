@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import QuizQuestion from '@/components/quiz/QuizQuestion';
 import QuizResults from '@/components/quiz/QuizResult';
+import ShareContentModal from '@/components/community/ShareContentModel';
 
 import React from 'react';
 
@@ -158,6 +159,7 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
             <ChevronRight className="w-4 h-4 ml-2" />
           </Button>
         )}
+        <ShareContentModal contentType="quiz" contentId={quiz._id} contentTitle={quiz.title} />
       </div>
     </div>
   );

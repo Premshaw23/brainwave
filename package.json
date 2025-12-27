@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "socket": "node server/socket-server.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run socket\"",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "socket": "node server/socket-server.js"
+    "start": "next start"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -23,8 +23,11 @@
     "@tanstack/react-query": "^5.90.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "firebase": "^12.7.0",
     "firebase-admin": "^13.6.0",
+    "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.562.0",
     "mongoose": "^9.0.2",
     "next": "16.1.1",
@@ -44,6 +47,7 @@
     "@types/pdf-parse": "^1.1.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "tailwindcss": "^4",
