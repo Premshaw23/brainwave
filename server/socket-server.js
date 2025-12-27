@@ -15,7 +15,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: [
       "http://localhost:3000",
-      "https://brainwave-two-iota.vercel.app/", // Your Vercel URL
+      "https://brainwave-two-iota.vercel.app", // Your Vercel URL (no trailing slash)
     ],
     methods: ["GET", "POST"],
     credentials: true,
