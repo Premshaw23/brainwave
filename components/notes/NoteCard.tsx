@@ -22,10 +22,11 @@ interface NoteCardProps {
 
 export default function NoteCard({ note, onDelete }: NoteCardProps) {
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleDateString('en-IN', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
+      timeZone: 'Asia/Kolkata',
     });
   };
 

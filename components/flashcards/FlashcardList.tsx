@@ -110,7 +110,7 @@ export default function FlashcardList() {
                   <div className="flex items-center gap-1 text-xs text-gray-500">
                     <Calendar className="w-3 h-3" />
                     <span>
-                      Last reviewed: {new Date(flashcard.lastReviewed).toLocaleDateString()}
+                      Last reviewed: {new Date(flashcard.lastReviewed).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
                     </span>
                   </div>
                 )}

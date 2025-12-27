@@ -146,9 +146,10 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     if (diffMinutes < 1) return 'Just now';
     if (diffMinutes < 60) return `${diffMinutes}m ago`;
     
-    return messageDate.toLocaleTimeString('en-US', {
+    return messageDate.toLocaleTimeString('en-IN', {
       hour: 'numeric',
       minute: '2-digit',
+      timeZone: 'Asia/Kolkata',
     });
   };
 

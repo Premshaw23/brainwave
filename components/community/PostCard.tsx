@@ -65,7 +65,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
-    return new Date(date).toLocaleDateString();
+    return new Date(date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
   };
 
   const getDifficultyColor = (difficulty: string) => {

@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Upload, FileText, Loader2 } from 'lucide-react';
+import { Upload, FileText } from 'lucide-react';
+import AppLoader from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -237,17 +238,7 @@ export default function NoteUpload() {
 
           {/* Submit Button */}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Note
-              </>
-            )}
+            {loading ? <AppLoader message="Uploading..." /> : <><Upload className="w-4 h-4 mr-2" />Upload Note</>}
           </Button>
         </form>
       </CardContent>

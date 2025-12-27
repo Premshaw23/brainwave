@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Brain, Loader2, Zap } from 'lucide-react';
+import { Brain, Zap } from 'lucide-react';
+import AppLoader from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -144,17 +145,7 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
           className="w-full"
           size="lg"
         >
-          {loading ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Generating Quiz with AI...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5 mr-2" />
-              Generate Quiz
-            </>
-          )}
+          {loading ? <AppLoader message="Generating quiz..." /> : <><Zap className="w-5 h-5 mr-2" />Generate Quiz</>}
         </Button>
 
         <p className="text-xs text-gray-500 text-center">

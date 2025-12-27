@@ -69,7 +69,7 @@ export default function StreakCard({ currentStreak, longestStreak, lastActive }:
 
         <div className="flex items-center gap-2 mt-5 text-xs opacity-85 font-semibold">
           <Calendar className="w-4 h-4" />
-          <span>Last active: {new Date(lastActive).toLocaleDateString()}</span>
+          <span>Last active: {new Date(lastActive).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}</span>
         </div>
       </CardContent>
     </Card>

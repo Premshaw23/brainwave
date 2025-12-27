@@ -65,7 +65,7 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
     if (seconds < 60) return 'Just now';
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-    return new Date(date).toLocaleDateString();
+    return new Date(date).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' });
   };
 
   return (

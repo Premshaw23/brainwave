@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from 'react';
 import NoteCard from './NoteCard';
-import { Loader2 } from 'lucide-react';
+import AppLoader from '@/components/ui/AppLoader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function NoteList() {
@@ -56,11 +56,7 @@ export default function NoteList() {
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
+    return <AppLoader message="Loading notes..." />;
   }
 
   if (error) {
