@@ -64,11 +64,11 @@ export function calculateStreak(attempts: any[]): number {
 
   let streak = 0;
   let currentDate = new Date();
-  currentDate.setHours(0, 0, 0, 0);
+  currentDate.setUTCHours(0, 0, 0, 0);
 
   for (const attempt of sortedAttempts) {
     const attemptDate = new Date(attempt.completedAt);
-    attemptDate.setHours(0, 0, 0, 0);
+    attemptDate.setUTCHours(0, 0, 0, 0);
 
     const diffDays = Math.floor(
       (currentDate.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
