@@ -6,13 +6,17 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 
+const PORT = process.env.PORT || 3001;
 const app = express();
 const httpServer = createServer(app);
 
 // Socket.io setup with CORS
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    origin: [
+      "http://localhost:3000",
+      "https://brainwave-two-iota.vercel.app/", // Your Vercel URL
+    ],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -88,12 +92,12 @@ const studyGroupSchema = new mongoose.Schema({
     required: true,
   },
   members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  inviteCode: { type: String, required: true, unique: true },
+  inviteCode: { type: String, required: true },
   isPrivate: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
 });
 
-studyGroupSchema.index({ inviteCode: 1 });
+studyGroupSchema.index({ inviteCode: 1 }, { unique: true });
 studyGroupSchema.index({ creatorId: 1 });
 
 const StudyGroup =
@@ -411,16 +415,8 @@ app.get("/health", (req, res) => {
 });
 
 // Start server
-const PORT = process.env.SOCKET_PORT || 3001;
-httpServer.listen(PORT, () => {
-  console.log(`
-╔═══════════════════════════════════════╗
-║  🚀 Socket.io Server Running          ║
-║  📡 Port: ${PORT}                        ║
-║  📊 MongoDB: Connected                ║
-║  ✅ Ready to accept connections       ║
-╚═══════════════════════════════════════╝
-  `);
+httpServer.listen(PORT, '0.0.0.0', () => {
+  console.log(`Socket.io server running on port ${PORT}`);
 });
 
 // Graceful shutdown
