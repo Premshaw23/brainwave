@@ -1,7 +1,13 @@
 // @ts-check
-import type { NextConfig } from "next";
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+});
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -34,6 +40,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {},
+  turbopack: {},
 };
 
-export default nextConfig;
+module.exports = withPWA(nextConfig);

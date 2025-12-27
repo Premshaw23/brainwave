@@ -18,7 +18,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  let {id}=use(params);
+  const {id}=use(params);
 
   useEffect(() => {
     fetchPost();

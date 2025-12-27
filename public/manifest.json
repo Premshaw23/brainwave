@@ -1,0 +1,47 @@
+{
+  "name": "BrainWave - AI Learning Platform for Notes, Quizzes, Flashcards & Community",
+  "short_name": "BrainWave",
+  "description": "BrainWave is an all-in-one AI-powered platform for students and lifelong learners. Create, share, and study notes, quizzes, flashcards, and join a vibrant learning community. Track your progress with analytics and boost your knowledge efficiently.",
+  "categories": ["education", "productivity", "ai", "learning", "notes", "quizzes", "flashcards", "community"],
+  "lang": "en",
+  "dir": "ltr",
+  "screenshots": [
+    {
+      "src": "/brain.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "label": "BrainWave logo"
+    },
+    {
+      "src": "/icon-32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "label": "App icon 32x32"
+    },
+    {
+      "src": "/icon-16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "label": "App icon 16x16"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

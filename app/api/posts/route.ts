@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     const query: any = {};
     
     // Get posts and populate content
-    let posts = await Post.find(query)
+    const posts = await Post.find(query)
       .populate('userId', 'displayName avatar')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
