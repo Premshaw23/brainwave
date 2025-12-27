@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       userId: authResult.userId,
       completedAt: { $gte: startDate },
     })
-      .populate('quizId')
+      .populate({ path: 'quizId', model: Quiz })
       .sort({ completedAt: 1 });
 
     // Group by date for chart

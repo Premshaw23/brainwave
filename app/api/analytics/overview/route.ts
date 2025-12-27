@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import QuizAttempt from '@/models/QuizAttempt';
+import Quiz from '@/models/Quiz';
 import User from '@/models/User';
 import { calculateStreak, calculateMasteryBySubject } from '@/lib/utils';
 
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Get all attempts
     const attempts = await QuizAttempt.find({ userId: authResult.userId })
-      .populate('quizId')
+      .populate({ path: 'quizId', model: Quiz })
       .sort({ completedAt: -1 });
 
     // Calculate stats

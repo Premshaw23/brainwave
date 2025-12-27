@@ -1,22 +1,37 @@
+// @ts-check
 import type { NextConfig } from "next";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
-   reactStrictMode: true,
+  reactStrictMode: true,
   images: {
     domains: [
-      'lh3.googleusercontent.com', // Google avatars
-      'firebasestorage.googleapis.com', // Firebase storage
+      'lh3.googleusercontent.com',
+      'firebasestorage.googleapis.com',
     ],
   },
-  // Enable compression
   compress: true,
-  // Production optimizations
   poweredByHeader: false,
   generateEtags: true,
-  // Socket.io compatibility
-  experimental: {
-    // serverActions is not a valid property here; removed to fix type error
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+        ],
+      },
+    ];
   },
+  experimental: {},
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

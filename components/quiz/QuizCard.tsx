@@ -14,7 +14,7 @@ interface QuizCardProps {
     title: string;
     subject: string;
     difficulty: 'easy' | 'medium' | 'hard';
-    questions: any[];
+    questionsCount?: number;
     createdAt: string;
   };
 }
@@ -49,7 +49,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
               </span>
               <span className="flex items-center gap-1">
                 <Target className="w-4 h-4" />
-                {quiz.questions?.length || 0} questions
+                {quiz.questionsCount ?? 0} questions
               </span>
             </div>
           </div>

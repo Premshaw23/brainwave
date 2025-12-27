@@ -26,9 +26,19 @@ export async function GET(request: NextRequest) {
     if (subject) query.subject = subject;
     if (difficulty) query.difficulty = difficulty;
 
-    const quizzes = await Quiz.find(query)
+    const quizzesRaw = await Quiz.find(query)
       .sort({ createdAt: -1 })
-      .select('-questions'); // Don't send questions in list view
+      .select('title subject difficulty createdAt questions');
+
+    // Map to include questionsCount only
+    const quizzes = quizzesRaw.map(q => ({
+      _id: q._id,
+      title: q.title,
+      subject: q.subject,
+      difficulty: q.difficulty,
+      createdAt: q.createdAt,
+      questionsCount: q.questions?.length || 0,
+    }));
 
     return NextResponse.json({
       success: true,
