@@ -111,7 +111,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
         {/* Content Preview */}
         {post.content && (
           <Link href={`/community/${post._id}`}>
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow border border-indigo-100">
+            <div className="bg-linear-to-br from-indigo-50 to-purple-50 rounded-lg p-4 mb-4 cursor-pointer hover:shadow-md transition-shadow border border-indigo-100">
               <div className="flex items-start gap-3">
                 <div className="bg-indigo-600 p-2 rounded-lg">
                   <Brain className="w-6 h-6 text-white" />

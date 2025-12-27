@@ -3,6 +3,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+import QuizAttempt from '@/models/QuizAttempt';
+import { calculateStreak } from '@/lib/utils';
 import { adminAuth } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
@@ -37,8 +39,12 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Update last active
+
+    // Update last active and streak
     user.lastActive = new Date();
+    // Recalculate streak based on attempts
+    const attempts = await QuizAttempt.find({ userId: user._id }).sort({ completedAt: -1 });
+    user.streak = calculateStreak(attempts);
     await user.save();
 
     return NextResponse.json({

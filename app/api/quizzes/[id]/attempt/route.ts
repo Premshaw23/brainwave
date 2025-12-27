@@ -73,10 +73,19 @@ export async function POST(
       timeSpent: timeSpent || 0,
     });
 
+
     // Award XP
     const xpEarned = correctCount * 10; // 10 XP per correct answer
+    // Calculate streak after this attempt
+    const allAttempts = await QuizAttempt.find({ userId: authResult.userId }).sort({ completedAt: -1 });
+    // Import calculateStreak at the top if not already
+    // import { calculateStreak } from '@/lib/utils';
+    // If not imported, add:
+    // import { calculateStreak } from '@/lib/utils';
+    const streak = require('@/lib/utils').calculateStreak(allAttempts);
     await User.findByIdAndUpdate(authResult.userId, {
-      $inc: { totalXP: xpEarned }
+      $inc: { totalXP: xpEarned },
+      $set: { streak: streak, lastActive: new Date() }
     });
 
     // Return results with explanations
