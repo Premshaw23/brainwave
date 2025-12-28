@@ -1,9 +1,11 @@
 
 // app/api/quizzes/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import Quiz from '@/models/Quiz';
+import mongoose from 'mongoose';
 
 export async function GET(request: NextRequest) {
   const authResult = await verifyAuth(request);
@@ -26,11 +28,12 @@ export async function GET(request: NextRequest) {
     if (subject) query.subject = subject;
     if (difficulty) query.difficulty = difficulty;
 
+
     const quizzesRaw = await Quiz.find(query)
       .sort({ createdAt: -1 })
-      .select('title subject difficulty createdAt questions');
+      .select('title subject difficulty createdAt questions userId');
 
-    // Map to include questionsCount only
+    // Map to include questionsCount and userId
     const quizzes = quizzesRaw.map(q => ({
       _id: q._id,
       title: q.title,
@@ -38,6 +41,7 @@ export async function GET(request: NextRequest) {
       difficulty: q.difficulty,
       createdAt: q.createdAt,
       questionsCount: q.questions?.length || 0,
+      userId: q.userId?.toString() || '',
     }));
 
     return NextResponse.json({
@@ -53,3 +57,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

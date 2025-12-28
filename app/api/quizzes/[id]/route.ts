@@ -69,3 +69,38 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  const { id } = await params;
+  if (!id || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { error: 'Invalid quiz ID' },
+      { status: 400 }
+    );
+  }
+  const authResult = await verifyAuth(request);
+  if ('error' in authResult) {
+    return NextResponse.json(
+      { error: authResult.error },
+      { status: authResult.status }
+    );
+  }
+  try {
+    await connectDB();
+    const quiz = await Quiz.findOne({ _id: id, userId: authResult.userId });
+    if (!quiz) {
+      return NextResponse.json(
+        { error: 'Quiz not found or not authorized' },
+        { status: 404 }
+      );
+    }
+    await Quiz.deleteOne({ _id: id });
+    return NextResponse.json({ success: true, message: 'Quiz deleted' });
+  } catch (error: any) {
+    console.error('Delete quiz error:', error);
+    return NextResponse.json(
+      { error: 'Failed to delete quiz', details: error.message },
+      { status: 500 }
+    );
+  }
+}

@@ -92,9 +92,9 @@ export async function GET(request: NextRequest) {
   const Post = require('@/models/Post').default;
   const allPosts = await Post.find({}, { _id: 1 });
   const allPostIds = allPosts.map((p: any) => p._id.toString());
-  console.log('[BOOKMARKS DEBUG] All Post _id:', allPostIds);
+  // console.log('[BOOKMARKS DEBUG] All Post _id:', allPostIds);
   const userBookmarksArr = Array.isArray(user.bookmarks) ? user.bookmarks : [];
-  console.log('[BOOKMARKS DEBUG] User bookmarks:', userBookmarksArr.map((b: any) => b.toString()));
+  // console.log('[BOOKMARKS DEBUG] User bookmarks:', userBookmarksArr.map((b: any) => b.toString()));
 
   // Ensure all bookmark IDs are ObjectId for query
   const mongoose = require('mongoose');
@@ -121,6 +121,11 @@ export async function GET(request: NextRequest) {
       if (content) {
         content.cardCount = content.cards?.length || 0;
       }
+    } else if (obj.contentType === 'note') {
+      const Note = require('@/models/Note').default;
+      content = await Note.findById(obj.contentId).lean();
+    } else if (obj.contentType === 'summary') {
+      content = obj.contentId;
     }
     return {
       ...obj,

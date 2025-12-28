@@ -1,9 +1,9 @@
-
 // components/quiz/QuizCard.tsx
 'use client';
 
 import Link from 'next/link';
-import { Brain, Clock, Target, Calendar } from 'lucide-react';
+import { useState,useEffect } from 'react';
+import { Brain, Clock, Target, Calendar, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,19 @@ interface QuizCardProps {
     difficulty: 'easy' | 'medium' | 'hard';
     questionsCount?: number;
     createdAt: string;
+    userId?: string;
   };
 }
 
 export default function QuizCard({ quiz }: QuizCardProps) {
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  useEffect(() => {
+    setCurrentUserId(localStorage.getItem('userId'));
+  }, []);
+  useEffect(() => {
+    // Debug log for userId comparison
+    console.log('QuizCard userId check:', quiz.userId, currentUserId);
+  }, [quiz.userId, currentUserId]);
   const difficultyColors = {
     easy: 'bg-green-100 text-green-800',
     medium: 'bg-yellow-100 text-yellow-800',
@@ -63,13 +72,41 @@ export default function QuizCard({ quiz }: QuizCardProps) {
               {quiz.difficulty}
             </Badge>
           </div>
-
-          <Link href={`/quizzes/${quiz._id}/take`}>
-            <Button>
-              <Brain className="w-4 h-4 mr-2" />
-              Take Quiz
-            </Button>
-          </Link>
+          <div className="flex gap-2 items-center">
+            <Link href={`/quizzes/${quiz._id}/take`}>
+              <Button>
+                <Brain className="w-4 h-4 mr-2" />
+                Take Quiz
+              </Button>
+            </Link>
+            {/* Quiz Deletion Button (owner only) */}
+            {currentUserId && quiz.userId === currentUserId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-red-600"
+                onClick={async () => {
+                  if (window.confirm('Delete this quiz? This cannot be undone.')) {
+                    const token = localStorage.getItem('authToken');
+                    console.log('Deleting quiz:', quiz._id, 'with token:', token);
+                    const res = await fetch(`/api/quizzes/${quiz._id}`, {
+                      method: 'DELETE',
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    console.log('Delete response:', res.status, data);
+                    if (res.ok) {
+                      window.location.reload();
+                    } else {
+                      alert(data.error || 'Failed to delete quiz');
+                    }
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

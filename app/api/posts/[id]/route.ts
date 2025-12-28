@@ -1,4 +1,3 @@
-
 // app/api/posts/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
@@ -55,6 +54,23 @@ export async function GET(
         subject: flashcard.subject,
         cards: flashcard.cards,
       } : null;
+    } else if (post.contentType === 'note') {
+      const Note = (await import('@/models/Note')).default;
+      let note = null;
+      try {
+        note = await Note.findById(post.contentId);
+      } catch (err) {
+        note = await Note.findOne({ _id: String(post.contentId) });
+      }
+      contentData = note ? {
+        _id: note._id,
+        title: note.title,
+        subject: note.subject,
+        tags: note.tags,
+        content: note.content,
+      } : null;
+    } else if (post.contentType === 'summary') {
+      contentData = post.contentId;
     }
 
     return NextResponse.json({

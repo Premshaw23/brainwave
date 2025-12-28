@@ -1,4 +1,3 @@
-
 // app/(dashboard)/community/[id]/page.tsx
 'use client';
 
@@ -125,7 +124,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
           </div>
 
           {/* Content Details */}
-          {post.content && (
+          {post.contentType === 'quiz' && post.content && (
             <Card className="bg-linear-to-br from-indigo-50 to-purple-50 border-indigo-200">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -197,6 +196,45 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     </Button>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Note Content */}
+          {post.contentType === 'note' && post.content && (
+            <Card className="bg-yellow-50 border-yellow-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="w-6 h-6 text-yellow-600" />
+                  {post.content.title || post.contentId}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mb-4">
+                  {post.content.subject && (
+                    <Badge className="capitalize">{post.content.subject}</Badge>
+                  )}
+                  {post.content.tags && post.content.tags.map((tag: string) => (
+                    <Badge key={tag} variant="outline">{tag}</Badge>
+                  ))}
+                </div>
+                <div className="text-gray-800 whitespace-pre-wrap text-sm">
+                  {post.content.content}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Summary Content */}
+          {post.contentType === 'summary' && post.content && (
+            <Card className="bg-gray-50 border-gray-200">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Analytics Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="whitespace-pre-wrap text-sm text-gray-800">{post.content}</pre>
               </CardContent>
             </Card>
           )}

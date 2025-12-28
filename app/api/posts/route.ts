@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
   try {
     const { contentType, contentId, caption } = await request.json();
 
+
     if (!contentType || !contentId) {
       return NextResponse.json(
         { error: 'Content type and ID are required' },
@@ -28,29 +29,52 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
 
-    // Verify content exists and belongs to user
+
+    // Verify content exists and belongs to user, except for screenshot
     let content;
     if (contentType === 'quiz') {
       content = await Quiz.findOne({ _id: contentId, userId: authResult.userId });
+      if (!content) {
+        return NextResponse.json(
+          { error: 'Content not found or not authorized' },
+          { status: 404 }
+        );
+      }
     } else if (contentType === 'flashcard') {
       content = await Flashcard.findOne({ _id: contentId, userId: authResult.userId });
+      if (!content) {
+        return NextResponse.json(
+          { error: 'Content not found or not authorized' },
+          { status: 404 }
+        );
+      }
+    } else if (contentType === 'note') {
+      // For notes, just check user ownership
+      const Note = (await import('@/models/Note')).default;
+      content = await Note.findOne({ _id: contentId, userId: authResult.userId });
+      if (!content) {
+        return NextResponse.json(
+          { error: 'Content not found or not authorized' },
+          { status: 404 }
+        );
+      }
+    } else if (contentType === 'screenshot') {
+      // Screenshot is a base64 string, no DB lookup needed
+      content = true;
     }
 
-    if (!content) {
-      return NextResponse.json(
-        { error: 'Content not found or not authorized' },
-        { status: 404 }
-      );
+
+    // Check if already shared (skip for screenshot)
+    if (contentType !== 'screenshot') {
+      const existingPost = await Post.findOne({ contentId, userId: authResult.userId });
+      if (existingPost) {
+        return NextResponse.json(
+          { error: 'Content already shared' },
+          { status: 409 }
+        );
+      }
     }
 
-    // Check if already shared
-    const existingPost = await Post.findOne({ contentId, userId: authResult.userId });
-    if (existingPost) {
-      return NextResponse.json(
-        { error: 'Content already shared' },
-        { status: 409 }
-      );
-    }
 
     // Create post
     const post = await Post.create({
@@ -91,11 +115,15 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const subject = searchParams.get('subject');
+    const contentType = searchParams.get('contentType');
 
     await connectDB();
 
     // Build query
     const query: any = {};
+    if (contentType) {
+      query.contentType = contentType;
+    }
     
     // Get posts and populate content
     const posts = await Post.find(query)
@@ -110,7 +138,7 @@ export async function GET(request: NextRequest) {
         let contentData = null;
 
         if (post.contentType === 'quiz') {
-          const quiz = await Quiz.findById(post.contentId).select('-questions');
+          const quiz = await Quiz.findById(post.contentId);
           contentData = quiz ? {
             _id: quiz._id,
             title: quiz.title,
@@ -126,6 +154,25 @@ export async function GET(request: NextRequest) {
             subject: flashcard.subject,
             cardCount: flashcard.cards.length,
           } : null;
+        } else if (post.contentType === 'note') {
+          const Note = (await import('@/models/Note')).default;
+          let note = null;
+          try {
+            note = await Note.findById(post.contentId);
+          } catch (err) {
+            // fallback: try as string
+            note = await Note.findOne({ _id: String(post.contentId) });
+          }
+          contentData = note ? {
+            _id: note._id,
+            title: note.title,
+            subject: note.subject,
+            tags: note.tags,
+            content: note.content,
+          } : null;
+        } else if (post.contentType === 'summary') {
+          // For summary, just use the contentId as the content
+          contentData = post.contentId;
         }
 
         // Filter by subject if requested

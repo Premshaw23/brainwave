@@ -3,7 +3,8 @@
 'use client';
 
 import Link from 'next/link';
-import { FileText, Calendar, Tag, Trash2, Brain } from 'lucide-react';
+import { FileText, Calendar, Tag, Trash2, Brain, Share2 } from 'lucide-react';
+import ShareContentModal from '@/components/community/ShareContentModel';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,7 +54,7 @@ export default function NoteCard({ note, onDelete }: NoteCardProps) {
         </div>
 
         <div className="flex items-center justify-between">
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {note.tags.slice(0, 3).map((tag) => (
               <Badge key={tag} variant="outline" className="text-xs">
                 <Tag className="w-3 h-3 mr-1" />
@@ -84,6 +85,17 @@ export default function NoteCard({ note, onDelete }: NoteCardProps) {
                 <Trash2 className="w-4 h-4" />
               </Button>
             )}
+            <ShareContentModal
+              contentType="note"
+              contentId={note._id}
+              contentTitle={note.title}
+              trigger={
+                <Button size="sm" variant="outline">
+                  <Share2 className="w-4 h-4 mr-1" />
+                  Share
+                </Button>
+              }
+            />
           </div>
         </div>
       </CardContent>

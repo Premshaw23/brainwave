@@ -38,6 +38,9 @@ export default function LoginForm() {
 
       if (data.success) {
         localStorage.setItem('authToken', firebaseToken);
+        if (data.user && data.user._id) {
+          localStorage.setItem('userId', data.user._id);
+        }
         router.push('/dashboard');
       } else {
         setError(data.error || 'Login failed');
@@ -68,6 +71,9 @@ export default function LoginForm() {
 
       if (data.success) {
         localStorage.setItem('authToken', firebaseToken);
+        if (data.user && data.user._id) {
+          localStorage.setItem('userId', data.user._id);
+        }
         router.push('/dashboard');
       } else {
         setError(data.error || 'Login failed');

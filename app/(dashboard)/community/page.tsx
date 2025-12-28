@@ -29,6 +29,9 @@ export default function CommunityPage() {
       if (currentFilters.subject !== 'all') {
         params.append('subject', currentFilters.subject);
       }
+        if (currentFilters.type !== 'all') {
+          params.append('contentType', currentFilters.type);
+        }
 
       const response = await fetch(`/api/posts?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -86,6 +89,8 @@ export default function CommunityPage() {
       {/* Filters */}
       <div className="bg-white rounded-lg p-4 shadow-sm border">
         <CommunityFilters
+          subject={filters.subject}
+          type={filters.type}
           onSubjectChange={handleSubjectChange}
           onTypeChange={handleTypeChange}
         />

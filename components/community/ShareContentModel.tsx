@@ -1,4 +1,3 @@
-
 // components/community/ShareContentModal.tsx
 'use client';
 
@@ -9,14 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Alert,AlertDescription } from '../ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface ShareContentModalProps {
-  contentType: 'quiz' | 'flashcard';
+import React from 'react';
+export interface ShareContentModalProps {
+  contentType: 'quiz' | 'flashcard' | 'note' | 'screenshot' | 'summary';
   contentId: string;
   contentTitle: string;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function ShareContentModal({
@@ -24,17 +26,22 @@ export default function ShareContentModal({
   contentId,
   contentTitle,
   trigger,
+  open,
+  onOpenChange,
 }: ShareContentModalProps) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [caption, setCaption] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Use controlled modal if open prop is provided, else fallback to internal state
+  const modalOpen = typeof open === 'boolean' ? open : internalOpen;
+  const setModalOpen = onOpenChange || setInternalOpen;
+
   const handleShare = async () => {
     setError('');
     setLoading(true);
-
     try {
       const token = localStorage.getItem('authToken');
       const response = await fetch('/api/posts', {
@@ -49,11 +56,9 @@ export default function ShareContentModal({
           caption: caption.trim(),
         }),
       });
-
       const data = await response.json();
-
       if (data.success) {
-        setOpen(false);
+        setModalOpen(false);
         router.push('/community');
       } else {
         setError(data.error || 'Failed to share');
@@ -66,7 +71,7 @@ export default function ShareContentModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline">
@@ -79,21 +84,18 @@ export default function ShareContentModal({
         <DialogHeader>
           <DialogTitle>Share to Community</DialogTitle>
         </DialogHeader>
-
         <div className="space-y-4">
           {error && (
             <Alert variant="destructive">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           <div className="bg-gray-50 rounded-lg p-4">
             <p className="text-sm font-medium text-gray-900 mb-1">
               Sharing: {contentTitle}
             </p>
             <Badge className="capitalize">{contentType}</Badge>
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="caption">Caption (optional)</Label>
             <Textarea
@@ -105,11 +107,10 @@ export default function ShareContentModal({
               rows={4}
             />
           </div>
-
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => setModalOpen(false)}
               disabled={loading}
               className="flex-1"
             >

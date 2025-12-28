@@ -33,7 +33,7 @@ export default function BookmarksPage() {
   
   useEffect(() => {
     if (!loading) {
-      console.log('[BookmarksPage] bookmarks:', bookmarks);
+      // console.log('[BookmarksPage] bookmarks:', bookmarks);
     }
   }, [bookmarks]);
   
@@ -67,18 +67,24 @@ export default function BookmarksPage() {
         </div>
       ) : (
         <div className="space-y-6">
-          {bookmarks.map((post) =>
-            post && post._id && post.userId && post.userId._id ? (
-              <PostCard
-                key={post._id}
-                post={{
-                  ...post,
-                  author: post.userId, // map userId to author
-                  isBookmarked: true,
-                }}
-              />
-            ) : null
-          )}
+          {bookmarks.map((post) => {
+            if (!post || !post._id || !post.userId || !post.userId._id) return null;
+            // Normalize post fields for PostCard
+            const normalized = {
+              _id: post._id,
+              author: post.userId,
+              contentType: post.contentType,
+              content: post.content,
+              caption: post.caption || '',
+              likeCount: post.likes ? post.likes.length : (post.likeCount || 0),
+              commentCount: post.comments ? post.comments.length : (post.commentCount || 0),
+              isLiked: post.likes ? post.likes.includes(post.userId._id) : false,
+              createdAt: post.createdAt,
+              contentId: post.contentId,
+              isBookmarked: true,
+            };
+            return <PostCard key={post._id} post={normalized} />;
+          })}
         </div>
       )}
     </div>

@@ -100,14 +100,16 @@ export async function GET(request: NextRequest) {
       .limit(3);
 
     const recentActivity = [
-      ...recentQuizzes.map((attempt: any) => ({
-        _id: attempt.quizId._id,
-        type: 'quiz',
-        title: attempt.quizId.title,
-        subject: attempt.quizId.subject,
-        score: attempt.score,
-        timestamp: attempt.completedAt,
-      })),
+      ...recentQuizzes
+        .filter((attempt: any) => attempt.quizId)
+        .map((attempt: any) => ({
+          _id: attempt.quizId._id,
+          type: 'quiz',
+          title: attempt.quizId.title,
+          subject: attempt.quizId.subject,
+          score: attempt.score,
+          timestamp: attempt.completedAt,
+        })),
       ...recentNotes.map((note: any) => ({
         _id: note._id,
         type: 'note',
