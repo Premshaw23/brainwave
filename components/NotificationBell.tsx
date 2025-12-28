@@ -87,35 +87,37 @@ export default function NotificationBell() {
         <div className="p-3 border-b">
           <h3 className="font-semibold">Notifications</h3>
         </div>
-        {notifications.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-sm">
-            No notifications
-          </div>
-        ) : (
-          notifications.map((notif) => {
-            const isGroupInvite = notif.type === 'system' && notif.message?.toLowerCase().includes('invited to join the group');
-            return (
-              <DropdownMenuItem
-                key={notif._id}
-                className={`p-3 cursor-pointer ${isGroupInvite ? 'bg-indigo-50' : ''}`}
-                onClick={() => {
-                  markAsRead(notif._id);
-                  if (isGroupInvite && notif.link) {
-                    window.location.href = notif.link;
-                  }
-                }}
-              >
-                <div className={notif.read ? 'opacity-60' : ''}>
-                  <p className="font-medium text-sm">{notif.title}</p>
-                  <p className="text-xs text-gray-600">{notif.message}</p>
-                  {isGroupInvite && notif.link && (
-                    <span className="text-xs text-indigo-600 underline mt-1 inline-block">Go to group</span>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            );
-          })
-        )}
+        <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+          {notifications.length === 0 ? (
+            <div className="p-4 text-center text-gray-500 text-sm">
+              No notifications
+            </div>
+          ) : (
+            notifications.map((notif) => {
+              const isGroupInvite = notif.type === 'system' && notif.message?.toLowerCase().includes('invited to join the group');
+              return (
+                <DropdownMenuItem
+                  key={notif._id}
+                  className={`p-3 cursor-pointer ${isGroupInvite ? 'bg-indigo-50' : ''}`}
+                  onClick={() => {
+                    markAsRead(notif._id);
+                    if (isGroupInvite && notif.link) {
+                      window.location.href = notif.link;
+                    }
+                  }}
+                >
+                  <div className={notif.read ? 'opacity-60' : ''}>
+                    <p className="font-medium text-sm">{notif.title}</p>
+                    <p className="text-xs text-gray-600">{notif.message}</p>
+                    {isGroupInvite && notif.link && (
+                      <span className="text-xs text-indigo-600 underline mt-1 inline-block">Go to group</span>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              );
+            })
+          )}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

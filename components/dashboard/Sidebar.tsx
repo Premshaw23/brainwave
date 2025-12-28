@@ -3,30 +3,40 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut, CreditCard, Bookmark } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut, CreditCard, Bookmark, User } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
-const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Notes', href: '/notes', icon: FileText },
-  { name: 'Quizzes', href: '/quizzes', icon: Brain },
-  { name: 'Flashcards', href: '/flashcards', icon: CreditCard },
-  { name: 'Bookmarks', href: '/bookmark', icon: Bookmark }, // ⭐ Bookmarks button
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Study Groups', href: '/groups', icon: Users },
-  { name: 'Community', href: '/community', icon: MessageSquare },
-];
 
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserId(localStorage.getItem('userId'));
+    }
+  }, []);
 
   const handleLogout = async () => {
     await auth.signOut();
     localStorage.removeItem('authToken');
     router.push('/login');
   };
+
+  const navigation = [
+    { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Notes', href: '/notes', icon: FileText },
+    { name: 'Quizzes', href: '/quizzes', icon: Brain },
+    { name: 'Flashcards', href: '/flashcards', icon: CreditCard },
+    { name: 'Bookmarks', href: '/bookmark', icon: Bookmark },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Study Groups', href: '/groups', icon: Users },
+    { name: 'Community', href: '/community', icon: MessageSquare },
+    { name: 'Profile', href: userId ? `/profile/${userId}` : '/profile', icon: User },
+  ];
 
   return (
     <div className="flex h-full py-2 w-64 flex-col bg-white border-r">
