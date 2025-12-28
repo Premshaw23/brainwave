@@ -1,4 +1,3 @@
-
 // components/analytics/Leaderboard.tsx
 'use client';
 
@@ -7,17 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Trophy, Medal, Award } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [userRank, setUserRank] = useState<number>(0);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchLeaderboard();
-  }, []);
+    if (user) {
+      fetchLeaderboard();
+    }
+  }, [user]);
 
   const fetchLeaderboard = async () => {
-    const token = localStorage.getItem('authToken');
+    if (!user) return;
+    const token = await user.getIdToken();
     const response = await fetch('/api/analytics/leaderboard', {
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -1,8 +1,8 @@
-
 // app/(dashboard)/analytics/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from './../../../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 import ProgressChart from '@/components/analytics/ProgressChart';
 import MasteryChart from '@/components/analytics/MasteryChart';
@@ -17,14 +17,18 @@ import { Brain, Target, Flame, Trophy } from 'lucide-react';
 export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const { user } = useAuth(); // Only call useAuth here
 
   useEffect(() => {
-    fetchAnalytics();
-  }, []);
+    if (user) {
+      fetchAnalytics(user);
+    }
+  }, [user]);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       
       // Fetch overview stats
       const overviewRes = await fetch('/api/analytics/overview', {

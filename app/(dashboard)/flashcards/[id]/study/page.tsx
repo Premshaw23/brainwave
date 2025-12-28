@@ -1,6 +1,7 @@
 'use client';
 
 import React, { use, useEffect, useState } from 'react';
+import { useAuth } from './../../../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,29 +13,29 @@ export default function FlashcardStudyPage({ params }: { params:Promise< { id: s
   const [flashcard, setFlashcard] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(false);
+  const { user } = useAuth();
   const {id}=use(params);
 
   useEffect(() => {
-    fetchFlashcard();
-  }, [id]);
-
-  const fetchFlashcard = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`/api/flashcards/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setFlashcard(data.flashcard);
+    const fetchFlashcard = async (userObj: any) => {
+      try {
+        if (!userObj) return;
+        const token = await userObj.getIdToken();
+        const response = await fetch(`/api/flashcards/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setFlashcard(data.flashcard);
+        }
+      } catch (error) {
+        console.error('Failed to fetch flashcard:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to fetch flashcard:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchFlashcard(user);
+  }, [id, user]);
 
   if (loading) {
     return (

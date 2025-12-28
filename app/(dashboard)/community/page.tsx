@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from './../../../context/AuthContext';
 import { Loader2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/community/PostCard';
@@ -13,14 +14,19 @@ export default function CommunityPage() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [filters, setFilters] = useState({ subject: 'all', type: 'all' });
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchPosts(1, filters);
-  }, [filters]);
+    if (user) {
+      fetchPosts(1, filters, user);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, user]);
 
-  const fetchPosts = async (pageNum: number, currentFilters: any) => {
+  const fetchPosts = async (pageNum: number, currentFilters: any, user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const params = new URLSearchParams({
         page: pageNum.toString(),
         limit: '10',
@@ -29,9 +35,9 @@ export default function CommunityPage() {
       if (currentFilters.subject !== 'all') {
         params.append('subject', currentFilters.subject);
       }
-        if (currentFilters.type !== 'all') {
-          params.append('contentType', currentFilters.type);
-        }
+      if (currentFilters.type !== 'all') {
+        params.append('contentType', currentFilters.type);
+      }
 
       const response = await fetch(`/api/posts?${params}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -43,7 +49,7 @@ export default function CommunityPage() {
         if (pageNum === 1) {
           setPosts(data.posts);
         } else {
-          setPosts([...posts, ...data.posts]);
+          setPosts((prev) => [...prev, ...data.posts]);
         }
         setHasMore(data.pagination.page < data.pagination.pages);
         setPage(pageNum);
@@ -66,7 +72,9 @@ export default function CommunityPage() {
   };
 
   const loadMore = () => {
-    fetchPosts(page + 1, filters);
+    if (user) {
+      fetchPosts(page + 1, filters, user);
+    }
   };
 
   if (loading && page === 1) {

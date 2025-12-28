@@ -28,7 +28,8 @@ export async function GET(
   try {
     await connectDB();
 
-    const user = await User.findById(id).select('-firebaseUid');
+    // Use firebaseUid for lookup since id may be a Firebase UID, not ObjectId
+    const user = await User.findOne({ firebaseUid: id }).select('-firebaseUid');
 
     if (!user) {
       return NextResponse.json(
@@ -37,8 +38,8 @@ export async function GET(
       );
     }
 
-    // Get user's posts and populate userId (author)
-    const posts = await Post.find({ userId: id })
+    // Get user's posts using the user's ObjectId
+    const posts = await Post.find({ userId: user._id })
       .populate('userId', 'displayName avatar')
       .sort({ createdAt: -1 })
       .limit(10);
@@ -68,29 +69,31 @@ export async function GET(
     }));
 
     // Get user stats
-    const quizAttempts = await QuizAttempt.find({ userId: id });
+    const quizAttempts = await QuizAttempt.find({ userId: user._id });
     const totalQuizzes = quizAttempts.length;
     const avgScore = quizAttempts.length > 0
       ? Math.round(quizAttempts.reduce((sum, a) => sum + a.score, 0) / quizAttempts.length)
       : 0;
 
+    const profileObj = {
+      _id: user._id,
+      displayName: user.displayName,
+      avatar: user.avatar,
+      studyInterests: user.studyInterests,
+      totalXP: user.totalXP,
+      streak: user.streak,
+      createdAt: user.createdAt,
+      stats: {
+        totalQuizzes,
+        avgScore,
+        postsCount: posts.length,
+      },
+      recentPosts: postsWithContent,
+    };
     return NextResponse.json({
       success: true,
-      profile: {
-        _id: user._id,
-        displayName: user.displayName,
-        avatar: user.avatar,
-        studyInterests: user.studyInterests,
-        totalXP: user.totalXP,
-        streak: user.streak,
-        createdAt: user.createdAt,
-        stats: {
-          totalQuizzes,
-          avgScore,
-          postsCount: posts.length,
-        },
-        recentPosts: postsWithContent,
-      },
+      profile: profileObj,
+      user: profileObj,
     });
 
   } catch (error: any) {

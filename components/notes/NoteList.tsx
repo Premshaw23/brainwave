@@ -3,11 +3,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import NoteCard from './NoteCard';
 import AppLoader from '@/components/ui/AppLoader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function NoteList() {
+  const { user } = useAuth();
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -18,7 +20,8 @@ export default function NoteList() {
 
   const fetchNotes = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/notes', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -41,7 +44,8 @@ export default function NoteList() {
     if (!confirm('Are you sure you want to delete this note?')) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch(`/api/notes/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },

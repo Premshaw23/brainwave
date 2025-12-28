@@ -8,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import QuizCard from '@/components/quiz/QuizCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function QuizzesPage() {
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -22,7 +24,8 @@ export default function QuizzesPage() {
 
   const fetchQuizzes = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const params = new URLSearchParams();
       if (subjectFilter !== 'all') params.append('subject', subjectFilter);
       if (difficultyFilter !== 'all') params.append('difficulty', difficultyFilter);

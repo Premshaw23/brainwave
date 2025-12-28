@@ -7,6 +7,7 @@ import { Send, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '../../context/AuthContext';
 
 interface Comment {
   _id: string;
@@ -25,6 +26,7 @@ interface CommentSectionProps {
 }
 
 export default function CommentSection({ postId, initialComments }: CommentSectionProps) {
+  const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>(initialComments);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,8 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch(`/api/posts/${postId}/comment`, {
         method: 'POST',
         headers: {

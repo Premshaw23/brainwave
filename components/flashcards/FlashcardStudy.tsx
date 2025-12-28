@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, RotateCw, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '../../context/AuthContext';
 
 interface FlashcardStudyProps {
   flashcardId: string;
@@ -21,6 +22,7 @@ export default function FlashcardStudy({
   cards: initialCards,
   onComplete 
 }: FlashcardStudyProps) {
+  const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [cards, setCards] = useState(initialCards);
@@ -39,7 +41,8 @@ export default function FlashcardStudy({
 
   const handleMastered = async (mastered: boolean) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       await fetch(`/api/flashcards/${flashcardId}/review`, {
         method: 'POST',
         headers: {

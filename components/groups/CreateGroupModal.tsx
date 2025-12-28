@@ -3,6 +3,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Users, Lock, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function CreateGroupModal() {
+  const { user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -27,7 +29,8 @@ export default function CreateGroupModal() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/groups', {
         method: 'POST',
         headers: {

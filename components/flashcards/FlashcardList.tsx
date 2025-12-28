@@ -7,8 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '../../context/AuthContext';
 
 export default function FlashcardList() {
+  const { user } = useAuth();
   const [flashcards, setFlashcards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +20,8 @@ export default function FlashcardList() {
 
   const fetchFlashcards = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/flashcards', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -38,7 +41,8 @@ export default function FlashcardList() {
     if (!confirm('Are you sure you want to delete this flashcard set?')) return;
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch(`/api/flashcards/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },

@@ -7,11 +7,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, Search, X } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import NotificationBell from '@/components/NotificationBell';
+import { useAuth } from '../../context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
+  const { user: authUser } = useAuth();
   const [search, setSearch] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -50,23 +52,22 @@ export default function Navbar() {
   }, []);
 
   const fetchUser = async () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) return;
-
+    if (!authUser) return;
+    const token = await authUser.getIdToken();
     const response = await fetch('/api/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
-
     if (response.ok) {
       const data = await response.json();
       setUser(data.user);
     }
   };
 
-  // Real search API: aggregate notes, quizzes, posts
+  // Real search API: aggregate notes, quizzes, posts, flashcards
   const handleSearch = async () => {
     setLoading(true);
-    const token = localStorage.getItem('authToken');
+    if (!authUser) return;
+    const token = await authUser.getIdToken();
     try {
       // Fetch notes
       const notesRes = await fetch(`/api/notes?page=1&limit=5`, {
@@ -83,6 +84,11 @@ export default function Navbar() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const postsData = postsRes.ok ? await postsRes.json() : { posts: [] };
+      // Fetch flashcards
+      const flashcardsRes = await fetch(`/api/flashcards?limit=5`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const flashcardsData = flashcardsRes.ok ? await flashcardsRes.json() : { flashcards: [] };
 
       // Map and filter results
       const noteResults = (notesData.notes || [])
@@ -106,8 +112,15 @@ export default function Navbar() {
           title: p.caption || 'Post',
           href: `/community/${p._id}`,
         }));
+      const flashcardResults = (flashcardsData.flashcards || [])
+        .filter((f: any) => f.title?.toLowerCase().includes(search.toLowerCase()))
+        .map((f: any) => ({
+          type: 'Flashcard',
+          title: f.title,
+          href: `/flashcards/${f._id}/study`,
+        }));
 
-      const allResults = [...noteResults, ...quizResults, ...postResults];
+      const allResults = [...noteResults, ...quizResults, ...flashcardResults, ...postResults];
       setResults(allResults);
       setShowDropdown(true);
     } catch (err) {
@@ -178,7 +191,7 @@ export default function Navbar() {
                 ) : (
                   <div>
                     {/* Sectioned results */}
-                    {['Note', 'Quiz', 'Post'].map((section) => {
+                    {['Note', 'Quiz', 'Flashcard', 'Post'].map((section) => {
                       const sectionResults = results.filter(r => r.type === section);
                       if (sectionResults.length === 0) return null;
                       return (
@@ -186,6 +199,7 @@ export default function Navbar() {
                           <div className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                             {section === 'Note' && 'Notes'}
                             {section === 'Quiz' && 'Quizzes'}
+                            {section === 'Flashcard' && 'Flashcards'}
                             {section === 'Post' && 'Posts'}
                           </div>
                           <ul className="divide-y divide-gray-100">
@@ -207,10 +221,13 @@ export default function Navbar() {
                                       ? 'bg-green-100 text-green-600'
                                       : item.type === 'Quiz'
                                       ? 'bg-indigo-100 text-indigo-600'
+                                      : item.type === 'Flashcard'
+                                      ? 'bg-yellow-100 text-yellow-600'
                                       : 'bg-pink-100 text-pink-600'
                                   }`}>
                                     {item.type === 'Note' && <span>📝</span>}
                                     {item.type === 'Quiz' && <span>❓</span>}
+                                    {item.type === 'Flashcard' && <span>📇</span>}
                                     {item.type === 'Post' && <span>💬</span>}
                                   </span>
                                   <div className="flex-1 min-w-0">

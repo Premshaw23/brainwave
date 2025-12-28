@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Alert,AlertDescription } from '../ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useAuth } from '../../context/AuthContext';
 
 import React from 'react';
 export interface ShareContentModalProps {
@@ -39,11 +40,13 @@ export default function ShareContentModal({
   const modalOpen = typeof open === 'boolean' ? open : internalOpen;
   const setModalOpen = onOpenChange || setInternalOpen;
 
+  const { user } = useAuth();
   const handleShare = async () => {
     setError('');
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/posts', {
         method: 'POST',
         headers: {

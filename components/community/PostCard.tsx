@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import { Heart, MessageCircle, Share2, Brain, Calendar, Bookmark, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,13 +31,9 @@ interface PostCardProps {
   onLike?: (postId: string) => void;
   onComment?: (postId: string) => void;
 }
-
 export default function PostCard({ post, onLike, onComment }: PostCardProps) {
-  // Get current user ID from localStorage
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  useEffect(() => {
-    setCurrentUserId(localStorage.getItem('userId'));
-  }, []);
+  const { user } = useAuth();
+  const currentUserId = user ? user.uid : null;
   const [liked, setLiked] = useState(post.isLiked);
   const [likeCount, setLikeCount] = useState(post.likeCount);
   const [liking, setLiking] = useState(false);
@@ -48,7 +45,8 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
     // Fetch bookmarks and set initial state
     const fetchBookmarks = async () => {
       try {
-        const token = localStorage.getItem('authToken');
+        if (!user) return;
+        const token = await user.getIdToken();
         const response = await fetch('/api/bookmarks', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -64,14 +62,15 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
       }
     };
     fetchBookmarks();
-  }, [post._id]);
+  }, [post._id, user]);
 
   const handleLike = async () => {
     if (liking) return;
     setLiking(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch(`/api/posts/${post._id}/like`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -137,7 +136,8 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
                 onClick={async () => {
                   setLiking(true);
                   try {
-                    const token = localStorage.getItem('authToken');
+                    if (!user) throw new Error('Not authenticated');
+                    const token = await user.getIdToken();
                     const response = await fetch('/api/bookmarks', {
                       method: 'POST',
                       headers: {
@@ -259,7 +259,8 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
               className="text-red-600"
               onClick={async () => {
                 if (window.confirm('Delete this post? This cannot be undone.')) {
-                  const token = localStorage.getItem('authToken');
+                  if (!user) return;
+                  const token = await user.getIdToken();
                   await fetch(`/api/posts/${post._id}`, {
                     method: 'DELETE',
                     headers: { Authorization: `Bearer ${token}` },

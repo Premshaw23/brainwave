@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut, CreditCard, Bookmark, User } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -12,17 +13,11 @@ import { useRouter } from 'next/navigation';
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUserId(localStorage.getItem('userId'));
-    }
-  }, []);
+  const { user, logout } = useAuth();
+  const userId = user ? user.uid : null;
 
   const handleLogout = async () => {
-    await auth.signOut();
-    localStorage.removeItem('authToken');
+    await logout();
     router.push('/login');
   };
 

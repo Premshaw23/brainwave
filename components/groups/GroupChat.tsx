@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +28,7 @@ interface GroupChatProps {
 }
 
 export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
+  const { user } = useAuth();
   const { socket, isConnected } = useSocket();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
@@ -48,7 +50,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     if (!inviteEmail) return;
     setInviteLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const res = await fetch(`/api/groups/${groupId}/invite`, {
         method: 'POST',
         headers: {
@@ -118,7 +121,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
   const fetchMessages = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch(`/api/groups/${groupId}/messages?limit=50`, {
         headers: { Authorization: `Bearer ${token}` },
       });

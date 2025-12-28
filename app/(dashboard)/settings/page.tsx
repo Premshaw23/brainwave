@@ -17,9 +17,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function SettingsPage() {
   const [user, setUser] = useState<any>(null);
+  const { user: authUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -27,7 +29,6 @@ export default function SettingsPage() {
 
   // Profile settings
   const [displayName, setDisplayName] = useState('');
-  const [bio, setBio] = useState('');
   const [studyInterests, setStudyInterests] = useState<string[]>([]);
 
   // Notification settings
@@ -37,11 +38,12 @@ export default function SettingsPage() {
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [authUser]);
 
   const fetchUser = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!authUser) return;
+      const token = await authUser.getIdToken();
       const response = await fetch('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -65,7 +67,8 @@ export default function SettingsPage() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!authUser) throw new Error('Not authenticated');
+      const token = await authUser.getIdToken();
       const response = await fetch('/api/auth/profile', {
         method: 'PUT',
         headers: {
@@ -168,7 +171,13 @@ export default function SettingsPage() {
                 </Avatar>
                 <div>
                   <p className="text-sm font-medium text-gray-900">{user?.email}</p>
-                  <p className="text-xs text-gray-500">Member since {new Date(user?.createdAt).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-500">
+                    Member since {(() => {
+                      if (!user?.createdAt) return 'Unknown';
+                      const date = new Date(user.createdAt);
+                      return isNaN(date.getTime()) ? 'Unknown' : date.toLocaleDateString();
+                    })()}
+                  </p>
                 </div>
               </div>
 

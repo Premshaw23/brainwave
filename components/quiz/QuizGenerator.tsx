@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Slider } from '@/components/ui/slider';
+import { useAuth } from '../../context/AuthContext';
 
 interface QuizGeneratorProps {
   noteId: string;
@@ -18,6 +19,7 @@ interface QuizGeneratorProps {
 }
 
 export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps) {
+  const { user } = useAuth();
   const router = useRouter();
   const [difficulty, setDifficulty] = useState('medium');
   const [numQuestions, setNumQuestions] = useState([5]);
@@ -29,7 +31,8 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/ai/generate-quiz', {
         method: 'POST',
         headers: {
@@ -141,7 +144,7 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         {/* Generate Button */}
         <Button
           onClick={handleGenerate}
-          disabled={loading}
+          disabled={loading || !user}
           className="w-full"
           size="lg"
         >

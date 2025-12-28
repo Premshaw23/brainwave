@@ -6,11 +6,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
 
 export default function SignupForm() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function SignupForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login, user } = useAuth();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,10 +47,8 @@ export default function SignupForm() {
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('authToken', firebaseToken);
-        if (data.user && data.user._id) {
-          localStorage.setItem('userId', data.user._id);
-        }
+        // login will update context and redirect
+        await login(email, password);
         router.push('/dashboard');
       } else {
         setError(data.error || 'Registration failed');
@@ -77,10 +78,9 @@ export default function SignupForm() {
       const data = await response.json();
 
       if (data.success) {
-        localStorage.setItem('authToken', firebaseToken);
-        if (data.user && data.user._id) {
-          localStorage.setItem('userId', data.user._id);
-        }
+        // login will update context and redirect
+        const email = userCredential.user.email ?? '';
+        await login(email, ''); // password not needed for Google
         router.push('/dashboard');
       } else {
         setError(data.error || 'Signup failed');

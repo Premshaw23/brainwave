@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '../../context/AuthContext';
 
 const SUBJECTS = [
   'Mathematics',
@@ -27,6 +28,7 @@ const SUBJECTS = [
 ];
 
 export default function NoteUpload() {
+  const { user } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('');
@@ -83,7 +85,9 @@ export default function NoteUpload() {
         formData.append('content', textContent);
       }
 
-      const token = localStorage.getItem('authToken');
+
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
       const response = await fetch('/api/notes/upload', {
         method: 'POST',
         headers: {

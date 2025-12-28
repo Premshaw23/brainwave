@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useSocket } from '@/lib/socket';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { socket } = useSocket();
+  const { user } = useAuth();
 
 
   useEffect(() => {
@@ -38,9 +40,11 @@ export default function NotificationBell() {
     };
   }, [socket]);
 
+
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch('/api/notifications', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -57,7 +61,8 @@ export default function NotificationBell() {
 
   const markAsRead = async (notificationId: string) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       await fetch('/api/notifications', {
         method: 'PUT',
         headers: {

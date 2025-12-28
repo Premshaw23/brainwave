@@ -3,6 +3,7 @@
 
 import { useEffect, useState,use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../../context/AuthContext';
 import { ArrowLeft, Heart, Share2, Brain, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,15 +18,19 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const {id}=use(params);
+  const { id } = use(params);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchPost();
-  }, [id]);
+    if (user) {
+      fetchPost(user);
+    }
+  }, [id, user]);
 
-  const fetchPost = async () => {
+  const fetchPost = async (user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch(`/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -46,7 +51,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 
   const handleLike = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch(`/api/posts/${id}/like`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },

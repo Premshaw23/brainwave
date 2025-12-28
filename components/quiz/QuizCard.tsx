@@ -2,7 +2,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Brain, Clock, Target, Calendar, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,12 +20,9 @@ interface QuizCardProps {
     userId?: string;
   };
 }
-
 export default function QuizCard({ quiz }: QuizCardProps) {
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
-  useEffect(() => {
-    setCurrentUserId(localStorage.getItem('userId'));
-  }, []);
+  const { user } = useAuth();
+  const currentUserId = user ? user.uid : null;
   useEffect(() => {
     // Debug log for userId comparison
     console.log('QuizCard userId check:', quiz.userId, currentUserId);
@@ -87,7 +85,8 @@ export default function QuizCard({ quiz }: QuizCardProps) {
                 className="text-red-600"
                 onClick={async () => {
                   if (window.confirm('Delete this quiz? This cannot be undone.')) {
-                    const token = localStorage.getItem('authToken');
+                    if (!user) return;
+                    const token = await user.getIdToken();
                     console.log('Deleting quiz:', quiz._id, 'with token:', token);
                     const res = await fetch(`/api/quizzes/${quiz._id}`, {
                       method: 'DELETE',

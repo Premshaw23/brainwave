@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
       streak: authResult.user.streak,
       totalXP: authResult.user.totalXP,
       lastActive: authResult.user.lastActive,
+      createdAt: authResult.user.createdAt,
     },
   });
 }

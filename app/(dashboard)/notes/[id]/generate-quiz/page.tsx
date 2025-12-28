@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../../../../context/AuthContext';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -14,19 +15,20 @@ export default function GenerateQuizPage({ params }: { params: Promise<{ id: str
   const { id } = React.use(params);
   const router = useRouter();
   const [note, setNote] = useState<any>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchNote();
-  }, [id]);
-
-  const fetchNote = async () => {
-    const token = localStorage.getItem('authToken');
-    const response = await fetch(`/api/notes/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    if (data.success) setNote(data.note);
-  };
+    const fetchNote = async (userObj: any) => {
+      if (!userObj) return;
+      const token = await userObj.getIdToken();
+      const response = await fetch(`/api/notes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) setNote(data.note);
+    };
+    fetchNote(user);
+  }, [id, user]);
 
   if (!note) return <div>Loading...</div>;
 

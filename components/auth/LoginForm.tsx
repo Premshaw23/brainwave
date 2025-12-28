@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,6 +18,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,27 +26,8 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseToken = await userCredential.user.getIdToken();
-
-      // Send token to our backend
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firebaseToken }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        localStorage.setItem('authToken', firebaseToken);
-        if (data.user && data.user._id) {
-          localStorage.setItem('userId', data.user._id);
-        }
-        router.push('/dashboard');
-      } else {
-        setError(data.error || 'Login failed');
-      }
+      await login(email, password);
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login');
     } finally {
@@ -59,25 +42,14 @@ export default function LoginForm() {
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
-      const firebaseToken = await userCredential.user.getIdToken();
-
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firebaseToken }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        localStorage.setItem('authToken', firebaseToken);
-        if (data.user && data.user._id) {
-          localStorage.setItem('userId', data.user._id);
-        }
-        router.push('/dashboard');
-      } else {
-        setError(data.error || 'Login failed');
+      // Ensure email is not null before calling login
+      const email = userCredential.user.email;
+      if (!email) {
+        throw new Error('Google account does not have an email address.');
       }
+      // login will update context and redirect
+      await login(email, '');
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login with Google');
     } finally {

@@ -8,36 +8,39 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
+import { useAuth } from '../../../../context/AuthContext';
 import Link from 'next/link';
 
 export default function NoteDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { user } = useAuth();
   const router = useRouter();
   const [note, setNote] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const { id: paramsid } = React.use(params);
 
+
   useEffect(() => {
-    fetchNote();
-  }, [paramsid]);
+    const fetchNote = async (userObj: any) => {
+      try {
+        if (!userObj) return;
+        const token = await userObj.getIdToken();
+        const response = await fetch(`/api/notes/${paramsid}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-  const fetchNote = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`/api/notes/${paramsid}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setNote(data.note);
+        const data = await response.json();
+        if (data.success) {
+          setNote(data.note);
+        }
+      } catch (err) {
+        console.error('Failed to fetch note:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch note:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchNote(user);
+  }, [paramsid, user]);
 
   if (loading) {
     return (

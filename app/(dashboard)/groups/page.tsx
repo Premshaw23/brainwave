@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from './../../../context/AuthContext';
 import { Users as UsersIcon, Loader2, UserPlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,14 +13,18 @@ import JoinGroupModal from '@/components/groups/JoinGroupModal';
 export default function GroupsPage() {
   const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
+    if (user) {
+      fetchGroups(user);
+    }
+  }, [user]);
 
-  const fetchGroups = async () => {
+  const fetchGroups = async (user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch('/api/groups', {
         headers: { Authorization: `Bearer ${token}` },
       });

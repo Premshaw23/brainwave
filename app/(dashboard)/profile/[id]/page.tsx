@@ -1,8 +1,8 @@
-
 // app/(dashboard)/profile/[id]/page.tsx
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useAuth } from '../../../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,32 +22,38 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState('');
   const {id}=use(params);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchProfile();
-  }, [id]);
-
-  const fetchProfile = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      const response = await fetch(`/api/users/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setProfile(data.profile);
-        setEditForm({
-          displayName: data.profile.displayName || '',
-          avatar: data.profile.avatar || '',
-          studyInterests: (data.profile.studyInterests || []).join(', '),
-        });
+    const fetchProfile = async () => {
+      if (!user) {
+        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error('Failed to fetch profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`/api/users/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success) {
+          setProfile(data.user || data.profile);
+          setEditForm({
+            displayName: (data.user || data.profile).displayName || '',
+            avatar: (data.user || data.profile).avatar || '',
+            studyInterests: ((data.user || data.profile).studyInterests || []).join(', '),
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, [id, user]);
+
+  // Removed duplicate fetchProfile
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
@@ -61,7 +67,9 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     setEditLoading(true);
     setEditError('');
     try {
-      const token = localStorage.getItem('authToken');
+      const { user } = useAuth();
+      if (!user) return;
+      const token = await user.getIdToken();
       const res = await fetch('/api/auth/profile', {
         method: 'PUT',
         headers: {

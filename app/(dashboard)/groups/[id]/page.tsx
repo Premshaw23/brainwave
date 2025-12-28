@@ -3,6 +3,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../../context/AuthContext';
 import { ArrowLeft, Copy, Check, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import MemberList from '@/components/groups/MemberList';
 export default function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [copied, setCopied] = useState(false);
@@ -25,9 +27,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [inviteError, setInviteError] = useState('');
 
   // Fetch functions hoisted for reuse
-  const fetchGroup = async () => {
+  const fetchGroup = async (user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch(`/api/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -41,8 +44,9 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       setLoading(false);
     }
   };
-  const fetchCurrentUser = async () => {
-    const token = localStorage.getItem('authToken');
+  const fetchCurrentUser = async (user: any) => {
+    if (!user) return;
+    const token = await user.getIdToken();
     const response = await fetch('/api/auth/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -51,9 +55,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       setCurrentUser(data.user);
     }
   };
-  const fetchInvites = async () => {
+  const fetchInvites = async (user: any) => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch('/api/groups/invites', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -67,16 +72,19 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     }
   };
   useEffect(() => {
-    fetchGroup();
-    fetchCurrentUser();
-    fetchInvites();
-  }, [id]);
+    if (user) {
+      fetchGroup(user);
+      fetchCurrentUser(user);
+      fetchInvites(user);
+    }
+  }, [id, user]);
 
   const handleInviteAction = async (inviteId: string, action: 'accept' | 'reject') => {
     setInviteActionLoading(true);
     setInviteError('');
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) throw new Error('User not authenticated');
+      const token = await user.getIdToken();
       const res = await fetch(`/api/groups/invites/${inviteId}`, {
         method: 'POST',
         headers: {
@@ -91,7 +99,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         if (pendingInvites.length <= 1) setInviteModalOpen(false);
         // Refresh group data after accepting
         if (action === 'accept') {
-          fetchGroup();
+          fetchGroup(user);
         }
       } else {
         setInviteError(data.error || 'Failed to respond to invite');
@@ -246,7 +254,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   variant="destructive"
                   className="w-full mt-4"
                   onClick={async () => {
-                    const token = localStorage.getItem('authToken');
+                    if (!user) return;
+                    const token = await user.getIdToken();
                     const res = await fetch(`/api/groups/${id}/leave`, {
                       method: 'POST',
                       headers: { Authorization: `Bearer ${token}` },

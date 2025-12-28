@@ -4,6 +4,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useAuth } from './../../../context/AuthContext';
 import StatsCard from '@/components/dashboard/Statcard';
 import { Brain, Target, Flame, Trophy, TrendingUp, Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,19 +15,21 @@ import { Progress } from '@/components/ui/progress';
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (user) {
+      fetchStats(user);
+    }
+  }, [user]);
 
-  const fetchStats = async () => {
-    const token = localStorage.getItem('authToken');
-    
+  const fetchStats = async (user: any) => {
+    if (!user) return;
+    const token = await user.getIdToken();
     try {
       const response = await fetch('/api/analytics/overview', {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       if (response.ok) {
         const data = await response.json();
         setStats(data.stats);

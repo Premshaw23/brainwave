@@ -10,10 +10,12 @@ import { Progress } from '@/components/ui/progress';
 import QuizQuestion from '@/components/quiz/QuizQuestion';
 import QuizResults from '@/components/quiz/QuizResult';
 import ShareContentModal from '@/components/community/ShareContentModel';
+import { useAuth } from '../../../../../context/AuthContext';
 
 import React from 'react';
 
 export default function TakeQuizPage({ params }: { params: Promise<{ id: string }> }) {
+  const { user } = useAuth();
   const { id } = React.use(params);
   const router = useRouter();
   const [quiz, setQuiz] = useState<any>(null);
@@ -24,20 +26,20 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
   const [results, setResults] = useState<any>(null);
 
   useEffect(() => {
-    fetchQuiz();
-  }, [id]);
-
-  const fetchQuiz = async () => {
-    const token = localStorage.getItem('authToken');
-    const response = await fetch(`/api/quizzes/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const data = await response.json();
-    if (data.success) {
-      setQuiz(data.quiz);
-      setAnswers(new Array(data.quiz.questions.length).fill(null));
-    }
-  };
+    const fetchQuiz = async (userObj: any) => {
+      if (!userObj) return;
+      const token = await userObj.getIdToken();
+      const response = await fetch(`/api/quizzes/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setQuiz(data.quiz);
+        setAnswers(new Array(data.quiz.questions.length).fill(null));
+      }
+    };
+    fetchQuiz(user);
+  }, [id, user]);
 
   const handleSelectAnswer = (answerIndex: number) => {
     const newAnswers = [...answers];
@@ -62,8 +64,9 @@ export default function TakeQuizPage({ params }: { params: Promise<{ id: string 
       return;
     }
 
+    if (!user) return;
     const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-    const token = localStorage.getItem('authToken');
+    const token = await user.getIdToken();
 
     const response = await fetch(`/api/quizzes/${id}/attempt`, {
       method: 'POST',

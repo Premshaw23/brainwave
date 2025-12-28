@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { useAuth } from '../../../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
 export default function GenerateFlashcardsPage({ params }: { params: Promise<{ id: string } >}) {
+  const { user } = useAuth();
   const router = useRouter();
   const [note, setNote] = useState<any>(null);
   const [numCards, setNumCards] = useState([10]);
@@ -21,7 +23,8 @@ export default function GenerateFlashcardsPage({ params }: { params: Promise<{ i
   }, [id]);
 
   const fetchNote = async () => {
-    const token = localStorage.getItem('authToken');
+    if (!user) return;
+    const token = await user.getIdToken();
     const response = await fetch(`/api/notes/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -34,7 +37,8 @@ export default function GenerateFlashcardsPage({ params }: { params: Promise<{ i
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch('/api/ai/generate-flashcards', {
         method: 'POST',
         headers: {

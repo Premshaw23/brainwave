@@ -4,10 +4,12 @@
 import { useEffect, useState } from 'react';
 import { Bookmark, Loader2 } from 'lucide-react';
 import PostCard from '@/components/community/PostCard';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function BookmarksPage() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   
   useEffect(() => {
     fetchBookmarks();
@@ -15,7 +17,8 @@ export default function BookmarksPage() {
   
   const fetchBookmarks = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      if (!user) return;
+      const token = await user.getIdToken();
       const response = await fetch('/api/bookmarks', {
         headers: { Authorization: `Bearer ${token}` },
       });
