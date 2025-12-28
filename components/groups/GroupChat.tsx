@@ -36,6 +36,42 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Invite state and handler
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState('');
+  const [inviteSuccess, setInviteSuccess] = useState(false);
+
+  const handleInvite = async () => {
+    setInviteError('');
+    setInviteSuccess(false);
+    if (!inviteEmail) return;
+    setInviteLoading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/groups/${groupId}/invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ inviteeEmail: inviteEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInviteSuccess(true);
+        setInviteEmail('');
+      } else {
+        setInviteError(data.error || 'Failed to send invite');
+      }
+    } catch (err: any) {
+      setInviteError(err.message || 'Failed to send invite');
+    } finally {
+      setInviteLoading(false);
+      setTimeout(() => setInviteSuccess(false), 2000);
+    }
+  };
+
   // Fetch initial messages
   useEffect(() => {
     fetchMessages();
@@ -43,37 +79,40 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
   // Socket event listeners
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !groupId || !currentUserId) return;
 
-    // Join group room
+    // Always (re-)join group room when groupId or currentUserId changes
     socket.emit('join_group', { groupId });
 
     // Listen for new messages
-    socket.on('new_message', (message: Message) => {
+    const handleNewMessage = (message: Message) => {
       setMessages((prev) => [...prev, message]);
       scrollToBottom();
-    });
+    };
+    socket.on('new_message', handleNewMessage);
 
     // Listen for typing indicators
-    socket.on('user_typing', ({ userId, displayName }) => {
+    const handleUserTyping = ({ userId, displayName }: any) => {
       if (userId !== currentUserId) {
         setTypingUsers((prev) => new Set(prev).add(displayName));
       }
-    });
+    };
+    socket.on('user_typing', handleUserTyping);
 
-    socket.on('typing_stopped', ({ userId }) => {
+    const handleTypingStopped = ({ userId }: any) => {
       setTypingUsers((prev) => {
         const updated = new Set(prev);
-        // Find and remove by userId (we'd need to track userId -> displayName)
+        // Optionally remove by displayName if tracked
         return updated;
       });
-    });
+    };
+    socket.on('typing_stopped', handleTypingStopped);
 
     return () => {
       socket.emit('leave_group', { groupId });
-      socket.off('new_message');
-      socket.off('user_typing');
-      socket.off('typing_stopped');
+      socket.off('new_message', handleNewMessage);
+      socket.off('user_typing', handleUserTyping);
+      socket.off('typing_stopped', handleTypingStopped);
     };
   }, [socket, groupId, currentUserId]);
 
@@ -163,6 +202,28 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
   return (
     <div className="flex flex-col h-full bg-white rounded-lg border">
+      {/* Header with Invite by Email on right */}
+      <div className="flex items-center justify-between border-b px-4 py-2">
+        <div className="font-semibold text-lg">Group Chat</div>
+        <div className="flex gap-2 items-center">
+          <Input
+            type="email"
+            placeholder="Invite by email..."
+            value={inviteEmail || ''}
+            onChange={e => setInviteEmail(e.target.value)}
+            disabled={inviteLoading}
+            className="w-48"
+          />
+          <Button
+            onClick={handleInvite}
+            disabled={!inviteEmail || inviteLoading}
+            variant="secondary"
+          >
+            {inviteLoading ? 'Sending...' : 'Invite'}
+          </Button>
+        </div>
+      </div>
+
       {/* Connection Status */}
       {!isConnected && (
         <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800">
@@ -240,7 +301,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
+      {/* Message Input Area */}
       <div className="border-t p-4">
         <div className="flex gap-2">
           <Input
@@ -265,6 +326,12 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
             )}
           </Button>
         </div>
+        {inviteError && (
+          <div className="text-red-500 text-xs mt-1">{inviteError}</div>
+        )}
+        {inviteSuccess && (
+          <div className="text-green-600 text-xs mt-1">Invite sent!</div>
+        )}
       </div>
     </div>
   );

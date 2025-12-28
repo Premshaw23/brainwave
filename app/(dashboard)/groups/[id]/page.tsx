@@ -1,9 +1,10 @@
 // app/(dashboard)/groups/[id]/page.tsx
 'use client';
 
-import { useEffect, useState ,use} from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Check, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,37 +18,90 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [copied, setCopied] = useState(false);
   const { id } = use(params);
+  // Invite modal state
+  const [pendingInvites, setPendingInvites] = useState<any[]>([]);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [inviteActionLoading, setInviteActionLoading] = useState(false);
+  const [inviteError, setInviteError] = useState('');
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const response = await fetch(`/api/groups/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await response.json();
-        if (data.success) {
-          setGroup(data.group);
-        }
-      } catch (error) {
-        console.error('Failed to fetch group:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchCurrentUser = async () => {
+  // Fetch functions hoisted for reuse
+  const fetchGroup = async () => {
+    try {
       const token = localStorage.getItem('authToken');
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch(`/api/groups/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
       if (data.success) {
-        setCurrentUser(data.user);
+        setGroup(data.group);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch group:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchCurrentUser = async () => {
+    const token = localStorage.getItem('authToken');
+    const response = await fetch('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await response.json();
+    if (data.success) {
+      setCurrentUser(data.user);
+    }
+  };
+  const fetchInvites = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('/api/groups/invites', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success && Array.isArray(data.invites)) {
+        setPendingInvites(data.invites);
+        if (data.invites.length > 0) setInviteModalOpen(true);
+      }
+    } catch (error) {
+      // ignore
+    }
+  };
+  useEffect(() => {
     fetchGroup();
     fetchCurrentUser();
+    fetchInvites();
   }, [id]);
+
+  const handleInviteAction = async (inviteId: string, action: 'accept' | 'reject') => {
+    setInviteActionLoading(true);
+    setInviteError('');
+    try {
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/groups/invites/${inviteId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPendingInvites((prev) => prev.filter((i) => i._id !== inviteId));
+        if (pendingInvites.length <= 1) setInviteModalOpen(false);
+        // Refresh group data after accepting
+        if (action === 'accept') {
+          fetchGroup();
+        }
+      } else {
+        setInviteError(data.error || 'Failed to respond to invite');
+      }
+    } catch (err: any) {
+      setInviteError(err.message || 'Failed to respond to invite');
+    } finally {
+      setInviteActionLoading(false);
+    }
+  };
 
   const copyInviteCode = () => {
     navigator.clipboard.writeText(group.inviteCode);
@@ -60,7 +114,45 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   if (!currentUser) return <div>Loading user...</div>;
 
   return (
-    <div className="space-y-6">
+    <>
+      {/* Invite Modal */}
+      <Dialog open={inviteModalOpen && pendingInvites.length > 0} onOpenChange={setInviteModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Group Invite</DialogTitle>
+          </DialogHeader>
+          {pendingInvites.length > 0 && (
+            <div className="space-y-4">
+              <div>
+                <p className="font-medium">You have been invited to join:</p>
+                <div className="mt-2 p-3 rounded bg-gray-100">
+                  <span className="font-semibold">{pendingInvites[0].groupId?.name || 'Study Group'}</span>
+                  <br />
+                  Invited by: {pendingInvites[0].inviterId?.displayName || pendingInvites[0].inviterId}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => handleInviteAction(pendingInvites[0]._id, 'accept')}
+                  disabled={inviteActionLoading}
+                >
+                  Accept
+                </Button>
+                <Button
+                  onClick={() => handleInviteAction(pendingInvites[0]._id, 'reject')}
+                  disabled={inviteActionLoading}
+                  variant="secondary"
+                >
+                  Reject
+                </Button>
+              </div>
+              {inviteError && <div className="text-red-500 text-xs">{inviteError}</div>}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {/* ...existing group detail page... */}
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -100,8 +192,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
               <CardTitle>Group Chat</CardTitle>
             </CardHeader>
             <CardContent className="h-[calc(100%-80px)]">
-              <GroupChat 
-                groupId={id} 
+              {/* Force remount of GroupChat when membership changes by using a key */}
+              <GroupChat
+                key={group.members.map((m: any) => m._id).join(',') + currentUser._id}
+                groupId={id}
                 currentUserId={currentUser._id}
               />
             </CardContent>
@@ -145,10 +239,34 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   {new Date(group.createdAt).toLocaleDateString()}
                 </span>
               </div>
+
+              {/* Leave Group Button (only for members, not creator) */}
+              {group.creator._id !== currentUser._id && group.members.some((m: any) => m._id === currentUser._id) && (
+                <Button
+                  variant="destructive"
+                  className="w-full mt-4"
+                  onClick={async () => {
+                    const token = localStorage.getItem('authToken');
+                    const res = await fetch(`/api/groups/${id}/leave`, {
+                      method: 'POST',
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      router.push('/groups');
+                    } else {
+                      alert(data.error || 'Failed to leave group');
+                    }
+                  }}
+                >
+                  Leave Group
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+    </>
   );
 }

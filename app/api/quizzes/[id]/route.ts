@@ -70,7 +70,7 @@ export async function GET(
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!id || id === 'undefined' || !mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(

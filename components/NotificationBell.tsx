@@ -92,18 +92,29 @@ export default function NotificationBell() {
             No notifications
           </div>
         ) : (
-          notifications.map((notif) => (
-            <DropdownMenuItem
-              key={notif._id}
-              className="p-3 cursor-pointer"
-              onClick={() => markAsRead(notif._id)}
-            >
-              <div className={notif.read ? 'opacity-60' : ''}>
-                <p className="font-medium text-sm">{notif.title}</p>
-                <p className="text-xs text-gray-600">{notif.message}</p>
-              </div>
-            </DropdownMenuItem>
-          ))
+          notifications.map((notif) => {
+            const isGroupInvite = notif.type === 'system' && notif.message?.toLowerCase().includes('invited to join the group');
+            return (
+              <DropdownMenuItem
+                key={notif._id}
+                className={`p-3 cursor-pointer ${isGroupInvite ? 'bg-indigo-50' : ''}`}
+                onClick={() => {
+                  markAsRead(notif._id);
+                  if (isGroupInvite && notif.link) {
+                    window.location.href = notif.link;
+                  }
+                }}
+              >
+                <div className={notif.read ? 'opacity-60' : ''}>
+                  <p className="font-medium text-sm">{notif.title}</p>
+                  <p className="text-xs text-gray-600">{notif.message}</p>
+                  {isGroupInvite && notif.link && (
+                    <span className="text-xs text-indigo-600 underline mt-1 inline-block">Go to group</span>
+                  )}
+                </div>
+              </DropdownMenuItem>
+            );
+          })
         )}
       </DropdownMenuContent>
     </DropdownMenu>

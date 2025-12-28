@@ -39,12 +39,24 @@ export async function GET(
       );
     }
 
-    // Verify user is member
-    if (!group.members.some((m: any) => m._id.toString() === authResult.userId)) {
-      return NextResponse.json(
-        { error: 'Not authorized' },
-        { status: 403 }
-      );
+    // Verify user is member or has a pending invite
+    const isMember = group.members.some((m: any) => m._id.toString() === authResult.userId);
+    if (!isMember) {
+      // If not a member, check for pending invite
+      const User = (await import('@/models/User')).default;
+      const GroupInvite = (await import('@/models/GroupInvite')).default;
+      const user = await User.findById(authResult.userId);
+      const hasInvite = await GroupInvite.findOne({
+        groupId: id,
+        inviteeEmail: user.email,
+        status: 'pending',
+      });
+      if (!hasInvite) {
+        return NextResponse.json(
+          { error: 'Not authorized' },
+          { status: 403 }
+        );
+      }
     }
 
     return NextResponse.json({
