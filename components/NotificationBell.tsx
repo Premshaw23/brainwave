@@ -3,6 +3,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSocket } from '@/lib/socket';
 import { Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,14 +16,27 @@ import {
 export default function NotificationBell() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { socket } = useSocket();
+
 
   useEffect(() => {
     fetchNotifications();
-    
     // Poll for new notifications every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Listen for real-time notifications
+    if (socket) {
+      socket.on('notification', (notif: any) => {
+        setNotifications((prev) => [notif, ...prev]);
+        setUnreadCount((prev) => prev + 1);
+      });
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (socket) socket.off('notification');
+    };
+  }, [socket]);
 
   const fetchNotifications = async () => {
     try {

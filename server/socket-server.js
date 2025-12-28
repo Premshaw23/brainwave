@@ -22,6 +22,9 @@ const io = new Server(httpServer, {
   },
 });
 
+// Make io globally available for notification emission
+global.io = io;
+
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;
 

@@ -5,8 +5,10 @@ import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import Quiz from '@/models/Quiz';
 import QuizAttempt from '@/models/QuizAttempt';
+
 import mongoose from 'mongoose';
 import User from '@/models/User';
+import { notifyStreakMilestone } from '@/lib/notificationService';
 
 export async function POST(
   request: NextRequest,
@@ -82,11 +84,18 @@ export async function POST(
     // import { calculateStreak } from '@/lib/utils';
     // If not imported, add:
     // import { calculateStreak } from '@/lib/utils';
+
     const streak = require('@/lib/utils').calculateStreak(allAttempts);
     await User.findByIdAndUpdate(authResult.userId, {
       $inc: { totalXP: xpEarned },
       $set: { streak: streak, lastActive: new Date() }
     });
+
+    // Notify on streak milestone
+    const streakMilestones = [3, 7, 14, 30, 100];
+    if (streakMilestones.includes(streak)) {
+      await notifyStreakMilestone(authResult.userId, streak);
+    }
 
     // Return results with explanations
     const results = gradedAnswers.map((answer, index) => {

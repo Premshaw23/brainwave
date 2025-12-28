@@ -1,9 +1,9 @@
-
 // app/api/notifications/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuth } from '@/lib/auth-middleware';
 import connectDB from '@/lib/mongodb';
 import Notification from '@/models/Notification';
+import mongoose from 'mongoose';
 
 export async function GET(request: NextRequest) {
   const authResult = await verifyAuth(request);
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const notifications = await Notification.find({
-      userId: authResult.userId,
+      userId: new mongoose.Types.ObjectId(authResult.userId),
     })
       .sort({ createdAt: -1 })
       .limit(20);
