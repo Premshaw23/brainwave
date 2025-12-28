@@ -8,8 +8,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/login');
+    if (!loading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (!user.emailVerified) {
+        router.replace('/verify');
+      }
     }
   }, [user, loading, router]);
 

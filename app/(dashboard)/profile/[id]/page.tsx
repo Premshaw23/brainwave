@@ -2,6 +2,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { updateProfile } from 'firebase/auth';
 import { useAuth } from '../../../../context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -84,6 +85,11 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
       });
       const data = await res.json();
       if (data.success) {
+        // Update Firebase user profile as well
+        await updateProfile(user, {
+          displayName: editForm.displayName,
+          photoURL: editForm.avatar || undefined,
+        });
         setProfile((prev: any) => ({ ...prev, ...data.user, studyInterests: data.user.studyInterests }));
         setEditOpen(false);
       } else {
@@ -108,8 +114,14 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     return <div>User not found</div>;
   }
 
+  // Debug output for troubleshooting owner check
+  // console.log('DEBUG user.uid:', user?.uid, 'profile.firebaseUid:', profile?.firebaseUid);
   return (
     <div className="w-full max-w-4xl mx-auto flex flex-col gap-8 px-2 sm:px-4 md:px-0">
+      {/* DEBUG: Show user.uid and profile.firebaseUid on page for troubleshooting */}
+      {/* <div style={{ background: '#ffeeba', color: '#856404', padding: 8, borderRadius: 4, marginBottom: 12, fontSize: 13 }}>
+        <strong>DEBUG:</strong> user.uid: {user?.uid || 'N/A'} | profile.firebaseUid: {profile?.firebaseUid || 'N/A'}
+      </div> */}
       {/* Profile Section */}
       <Card className="shadow-lg border-0 bg-white">
         <CardContent className="p-6 md:p-10 flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start">
@@ -120,114 +132,116 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
                 {profile.displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <Dialog open={editOpen} onOpenChange={setEditOpen}>
-              <DialogTrigger asChild>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="shadow"
-                >
-                  Edit Profile
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit Profile</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleEditSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Display Name</label>
-                    <Input
-                      name="displayName"
-                      value={editForm.displayName}
-                      onChange={handleEditChange}
-                      required
-                      maxLength={32}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Avatar</label>
-                    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-16 h-16 rounded-full border-2 border-indigo-200 shadow overflow-hidden bg-white flex items-center justify-center">
-                          {avatarPreview || editForm.avatar ? (
-                            <img
-                              src={avatarPreview || editForm.avatar}
-                              alt="Avatar Preview"
-                              className="w-full h-full object-cover"
-                              onError={e => (e.currentTarget.style.display = 'none')}
-                            />
-                          ) : (
-                            <span className="text-2xl text-indigo-400">?</span>
-                          )}
+            {user && profile.firebaseUid && user.uid === profile.firebaseUid && (
+              <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="shadow"
+                  >
+                    Edit Profile
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Profile</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleEditSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Display Name</label>
+                      <Input
+                        name="displayName"
+                        value={editForm.displayName}
+                        onChange={handleEditChange}
+                        required
+                        maxLength={32}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Avatar</label>
+                      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-16 h-16 rounded-full border-2 border-indigo-200 shadow overflow-hidden bg-white flex items-center justify-center">
+                            {avatarPreview || editForm.avatar ? (
+                              <img
+                                src={avatarPreview || editForm.avatar}
+                                alt="Avatar Preview"
+                                className="w-full h-full object-cover"
+                                onError={e => (e.currentTarget.style.display = 'none')}
+                              />
+                            ) : (
+                              <span className="text-2xl text-indigo-400">?</span>
+                            )}
+                          </div>
+                          {avatarUploading && <span className="text-xs text-indigo-500">Uploading...</span>}
                         </div>
-                        {avatarUploading && <span className="text-xs text-indigo-500">Uploading...</span>}
-                      </div>
-                      <div className="flex-1 w-full flex flex-col gap-2">
-                        <Input
-                          name="avatar"
-                          value={editForm.avatar}
-                          onChange={handleEditChange}
-                          placeholder="https://..."
-                        />
-                        <label className="inline-block cursor-pointer text-xs font-medium bg-indigo-50 border border-indigo-200 px-2 py-1 rounded hover:bg-indigo-100 w-fit">
-                          Upload Image
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={async (e) => {
-                              const file = e.target.files?.[0];
-                              if (!file) return;
-                              setAvatarUploading(true);
-                              setAvatarPreview(URL.createObjectURL(file));
-                              const formData = new FormData();
-                              formData.append('file', file);
-                              try {
-                                const res = await fetch('/api/upload-avatar', {
-                                  method: 'POST',
-                                  body: formData,
-                                });
-                                const data = await res.json();
-                                if (data.success && data.url) {
-                                  setEditForm(f => ({ ...f, avatar: data.url }));
-                                  setAvatarPreview(data.url);
-                                } else {
-                                  alert('Upload failed');
-                                }
-                              } catch {
-                                alert('Upload failed');
-                              } finally {
-                                setAvatarUploading(false);
-                              }
-                            }}
+                        <div className="flex-1 w-full flex flex-col gap-2">
+                          <Input
+                            name="avatar"
+                            value={editForm.avatar}
+                            onChange={handleEditChange}
+                            placeholder="https://..."
                           />
-                        </label>
+                          <label className="inline-block cursor-pointer text-xs font-medium bg-indigo-50 border border-indigo-200 px-2 py-1 rounded hover:bg-indigo-100 w-fit">
+                            Upload Image
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setAvatarUploading(true);
+                                setAvatarPreview(URL.createObjectURL(file));
+                                const formData = new FormData();
+                                formData.append('file', file);
+                                try {
+                                  const res = await fetch('/api/upload-avatar', {
+                                    method: 'POST',
+                                    body: formData,
+                                  });
+                                  const data = await res.json();
+                                  if (data.success && data.url) {
+                                    setEditForm(f => ({ ...f, avatar: data.url }));
+                                    setAvatarPreview(data.url);
+                                  } else {
+                                    alert('Upload failed');
+                                  }
+                                } catch {
+                                  alert('Upload failed');
+                                } finally {
+                                  setAvatarUploading(false);
+                                }
+                              }}
+                            />
+                          </label>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Study Interests</label>
-                    <Input
-                      name="studyInterests"
-                      value={editForm.studyInterests}
-                      onChange={handleEditChange}
-                      placeholder="e.g. Math, Science, History"
-                    />
-                    <div className="text-xs text-gray-500 mt-1">Comma separated</div>
-                  </div>
-                  {editError && <div className="text-red-600 text-sm">{editError}</div>}
-                  <DialogFooter>
-                    <Button type="submit" disabled={editLoading}>
-                      {editLoading ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                    <DialogClose asChild>
-                      <Button type="button" variant="ghost">Cancel</Button>
-                    </DialogClose>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Study Interests</label>
+                      <Input
+                        name="studyInterests"
+                        value={editForm.studyInterests}
+                        onChange={handleEditChange}
+                        placeholder="e.g. Math, Science, History"
+                      />
+                      <div className="text-xs text-gray-500 mt-1">Comma separated</div>
+                    </div>
+                    {editError && <div className="text-red-600 text-sm">{editError}</div>}
+                    <DialogFooter>
+                      <Button type="submit" disabled={editLoading}>
+                        {editLoading ? 'Saving...' : 'Save Changes'}
+                      </Button>
+                      <DialogClose asChild>
+                        <Button type="button" variant="ghost">Cancel</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
           <div className="flex-1 w-full flex flex-col gap-2 md:gap-4 justify-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-2">

@@ -29,7 +29,7 @@ export async function GET(
     await connectDB();
 
     // Use firebaseUid for lookup since id may be a Firebase UID, not ObjectId
-    const user = await User.findOne({ firebaseUid: id }).select('-firebaseUid');
+    const user = await User.findOne({ firebaseUid: id });
 
     if (!user) {
       return NextResponse.json(
@@ -77,6 +77,7 @@ export async function GET(
 
     const profileObj = {
       _id: user._id,
+      firebaseUid: user.firebaseUid, // Add this line
       displayName: user.displayName,
       avatar: user.avatar,
       studyInterests: user.studyInterests,

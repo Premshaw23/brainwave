@@ -3,8 +3,9 @@
 'use client';
 
 import { useState } from 'react';
+import ForgotPasswordModal from './ForgotPasswordModal';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function SignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, user } = useAuth();
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +38,8 @@ export default function SignupForm() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Update Firebase user profile with displayName
+      await updateProfile(userCredential.user, { displayName });
       const firebaseToken = await userCredential.user.getIdToken();
 
       const response = await fetch('/api/auth/register', {
@@ -63,7 +67,6 @@ export default function SignupForm() {
   const handleGoogleSignup = async () => {
     setError('');
     setLoading(true);
-
     try {
       const provider = new GoogleAuthProvider();
       const userCredential = await signInWithPopup(auth, provider);
@@ -78,9 +81,7 @@ export default function SignupForm() {
       const data = await response.json();
 
       if (data.success) {
-        // login will update context and redirect
-        const email = userCredential.user.email ?? '';
-        await login(email, ''); // password not needed for Google
+        // User is now authenticated via Firebase, context will update automatically
         router.push('/dashboard');
       } else {
         setError(data.error || 'Signup failed');
@@ -93,6 +94,8 @@ export default function SignupForm() {
   };
 
   return (
+    <>
+    <ForgotPasswordModal open={showForgot} onClose={() => setShowForgot(false)} />
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
@@ -143,7 +146,17 @@ export default function SignupForm() {
               required
               disabled={loading}
             />
-            <p className="text-xs text-muted-foreground">At least 6 characters</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted-foreground">At least 6 characters</p>
+              <button
+                type="button"
+                className="text-xs text-indigo-600 hover:underline"
+                onClick={() => setShowForgot(true)}
+                tabIndex={-1}
+              >
+                Forgot password?
+              </button>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -196,5 +209,6 @@ export default function SignupForm() {
         </p>
       </CardContent>
     </Card>
+    </>
   );
 }

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import ForgotPasswordModal from './ForgotPasswordModal';
 import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -19,6 +20,7 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
+  const [showForgot, setShowForgot] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +40,10 @@ export default function LoginForm() {
   const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
-
     try {
       const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      // Ensure email is not null before calling login
-      const email = userCredential.user.email;
-      if (!email) {
-        throw new Error('Google account does not have an email address.');
-      }
-      // login will update context and redirect
-      await login(email, '');
+      await signInWithPopup(auth, provider);
+      // User is now authenticated via Firebase, context will update automatically
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login with Google');
@@ -58,6 +53,8 @@ export default function LoginForm() {
   };
 
   return (
+    <>
+    <ForgotPasswordModal open={showForgot} onClose={() => setShowForgot(false)} />
     <Card className="w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
@@ -95,6 +92,14 @@ export default function LoginForm() {
               required
               disabled={loading}
             />
+            <button
+              type="button"
+              className="text-xs text-indigo-600 hover:underline my-2 mb-3 float-right"
+              onClick={() => setShowForgot(true)}
+              tabIndex={-1}
+            >
+              Forgot password?
+            </button>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
@@ -147,5 +152,6 @@ export default function LoginForm() {
         </p>
       </CardContent>
     </Card>
+    </>
   );
 }
