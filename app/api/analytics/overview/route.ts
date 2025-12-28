@@ -6,7 +6,7 @@ import connectDB from '@/lib/mongodb';
 import QuizAttempt from '@/models/QuizAttempt';
 import Quiz from '@/models/Quiz';
 import User from '@/models/User';
-import { calculateStreak, calculateMasteryBySubject } from '@/lib/utils';
+import { calculateStreak, calculateMasteryBySubject,calculateLongestStreak } from '@/lib/utils';
 
 export async function GET(request: NextRequest) {
   const authResult = await verifyAuth(request);
@@ -36,33 +36,9 @@ export async function GET(request: NextRequest) {
     // Calculate streak
     const streak = calculateStreak(attempts);
 
-    // Calculate longest streak
-    let longestStreak = 0;
-    let tempStreak = 0;
-    let lastDate: Date | null = null;
 
-    attempts.forEach((attempt) => {
-      const attemptDate = new Date(attempt.completedAt);
-      attemptDate.setHours(0, 0, 0, 0);
-
-      if (!lastDate) {
-        tempStreak = 1;
-      } else {
-        const diffDays = Math.floor(
-          (lastDate.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
-        );
-
-        if (diffDays === 1) {
-          tempStreak++;
-        } else {
-          longestStreak = Math.max(longestStreak, tempStreak);
-          tempStreak = 1;
-        }
-      }
-
-      lastDate = attemptDate;
-    });
-    longestStreak = Math.max(longestStreak, tempStreak);
+    // Calculate longest streak using utility
+    const longestStreak = calculateLongestStreak(attempts);
 
     // Get mastery by subject
     const masteryBySubject = calculateMasteryBySubject(attempts);

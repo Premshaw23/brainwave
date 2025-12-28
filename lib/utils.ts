@@ -54,35 +54,66 @@ export function getSubjectColor(subject: string): string {
 }
 
 
+
+// Calculates the current streak (including today if active, or up to yesterday if not)
 export function calculateStreak(attempts: any[]): number {
   if (attempts.length === 0) return 0;
 
-  // Sort attempts by date
-  const sortedAttempts = [...attempts].sort(
-    (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+  // Get unique days with activity (UTC)
+  const daysSet = new Set(
+    attempts.map(a => {
+      const d = new Date(a.completedAt);
+      d.setUTCHours(0, 0, 0, 0);
+      return d.getTime();
+    })
   );
+  if (daysSet.size === 0) return 0;
 
+  // Sort days descending
+  const days = Array.from(daysSet).sort((a, b) => b - a);
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(today.getUTCDate() - 1);
+
+  // If user was active today or yesterday, start streak
   let streak = 0;
-  let currentDate = new Date();
-  currentDate.setUTCHours(0, 0, 0, 0);
+  let expected = days[0] === today.getTime() ? today.getTime() : (days[0] === yesterday.getTime() ? yesterday.getTime() : null);
+  if (expected === null) return 0;
 
-  for (const attempt of sortedAttempts) {
-    const attemptDate = new Date(attempt.completedAt);
-    attemptDate.setUTCHours(0, 0, 0, 0);
+  for (let i = 0; i < days.length; i++) {
+    if (days[i] !== expected) break;
+    streak++;
+    expected -= 24 * 60 * 60 * 1000; // go to previous day
+  }
+  return streak;
+}
 
-    const diffDays = Math.floor(
-      (currentDate.getTime() - attemptDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDays === streak || (streak === 0 && diffDays === 0)) {
-      streak++;
-      currentDate = attemptDate;
-    } else if (diffDays > streak + 1) {
-      break;
+// Calculates the longest streak ever
+export function calculateLongestStreak(attempts: any[]): number {
+  if (attempts.length === 0) return 0;
+  // Get unique days with activity (UTC)
+  const daysSet = new Set(
+    attempts.map(a => {
+      const d = new Date(a.completedAt);
+      d.setUTCHours(0, 0, 0, 0);
+      return d.getTime();
+    })
+  );
+  if (daysSet.size === 0) return 0;
+  // Sort ascending
+  const days = Array.from(daysSet).sort((a, b) => a - b);
+  let longest = 1;
+  let current = 1;
+  for (let i = 1; i < days.length; i++) {
+    if (days[i] - days[i - 1] === 24 * 60 * 60 * 1000) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      current = 1;
     }
   }
-
-  return streak;
+  return longest;
 }
 
 export function calculateMasteryBySubject(attempts: any[]): any[] {
