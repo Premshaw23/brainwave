@@ -117,9 +117,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (!group) return <div>Group not found</div>;
-  if (!currentUser) return <div>Loading user...</div>;
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-[40vh]">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-500" />
+    </div>
+  );
+  if (!group) return <div className="text-center text-lg text-gray-500 py-12">Group not found</div>;
+  if (!currentUser) return <div className="text-center text-lg text-gray-500 py-12">Loading user...</div>;
 
   return (
     <>
@@ -133,16 +137,17 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             <div className="space-y-4">
               <div>
                 <p className="font-medium">You have been invited to join:</p>
-                <div className="mt-2 p-3 rounded bg-gray-100">
-                  <span className="font-semibold">{pendingInvites[0].groupId?.name || 'Study Group'}</span>
+                <div className="mt-2 p-3 rounded bg-indigo-50 border border-indigo-100">
+                  <span className="font-semibold text-indigo-800">{pendingInvites[0].groupId?.name || 'Study Group'}</span>
                   <br />
-                  Invited by: {pendingInvites[0].inviterId?.displayName || pendingInvites[0].inviterId}
+                  <span className="text-sm text-gray-700">Invited by: {pendingInvites[0].inviterId?.displayName || pendingInvites[0].inviterId}</span>
                 </div>
               </div>
               <div className="flex gap-2">
                 <Button
                   onClick={() => handleInviteAction(pendingInvites[0]._id, 'accept')}
                   disabled={inviteActionLoading}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
                 >
                   Accept
                 </Button>
@@ -159,100 +164,88 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           )}
         </DialogContent>
       </Dialog>
-      {/* ...existing group detail page... */}
-      <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => router.back()}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
-            {group.description && (
-              <p className="text-gray-600 mt-1">{group.description}</p>
-            )}
+      {/* Group Detail Page */}
+      <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto pb-6">
+        {/* Header - minimal, less visual weight */}
+        <div className="flex items-center justify-between px-2 pb-2">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" onClick={() => router.back()} className="text-indigo-700 hover:bg-indigo-100 px-2 py-1">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-indigo-800 tracking-tight">{group.name}</h1>
+              {group.description && (
+                <p className="text-gray-600 mt-0.5 text-base">{group.description}</p>
+              )}
+            </div>
           </div>
+          <Button variant="outline" onClick={copyInviteCode} className="border-indigo-100 bg-indigo-50 text-indigo-700 font-semibold hover:bg-indigo-100 px-3 py-1">
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 mr-2" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="w-4 h-4 mr-2" />
+                Invite: {group.inviteCode}
+              </>
+            )}
+          </Button>
         </div>
 
-        <Button variant="outline" onClick={copyInviteCode}>
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 mr-2" />
-              Copied!
-            </>
-          ) : (
-            <>
-              <Copy className="w-4 h-4 mr-2" />
-              Invite: {group.inviteCode}
-            </>
-          )}
-        </Button>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chat - Takes 2 columns on large screens */}
-        <div className="lg:col-span-2">
-          <Card className="h-150">
-            <CardHeader>
-              <CardTitle>Group Chat</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[calc(100%-80px)]">
-              {/* Force remount of GroupChat when membership changes by using a key */}
+        {/* Main Content - chat is visually dominant */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Chat - visually dominant, no card, no border */}
+          <div className="lg:col-span-2 flex flex-col">
+            <div className="flex-1 min-h-125 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 scrollbar-track-indigo-50 rounded-xl bg-white/90 shadow-sm">
               <GroupChat
                 key={group.members.map((m: any) => m._id).join(',') + currentUser._id}
                 groupId={id}
                 currentUserId={currentUser._id}
               />
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </div>
 
-        {/* Sidebar - Members list */}
-        <div className="space-y-6">
-          <MemberList
-            groupId={id}
-            members={group.members}
-            creatorId={group.creator._id}
-          />
-
-          {/* Group Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Group Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Created by</p>
+          {/* Sidebar - Members list and info, visually lighter */}
+          <div className="space-y-4">
+            <div className="bg-white/80 rounded-xl p-4 shadow-sm border border-indigo-50">
+              <MemberList
+                groupId={id}
+                members={group.members}
+                creatorId={group.creator._id}
+              />
+            </div>
+            <div className="bg-white/70 rounded-xl p-4 border border-indigo-50">
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Created by</p>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
                     {group.creator.displayName.charAt(0).toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium">
+                  <span className="text-sm font-medium text-indigo-800">
                     {group.creator.displayName}
                   </span>
                 </div>
               </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Invite Code</p>
-                <Badge className="font-mono text-lg">{group.inviteCode}</Badge>
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Invite Code</p>
+                <Badge className="font-mono text-base bg-indigo-50 text-indigo-700 border-indigo-100">
+                  {group.inviteCode}
+                </Badge>
               </div>
-
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Created</p>
-                <span className="text-sm">
+              <div className="mb-3">
+                <p className="text-xs text-gray-500 mb-1">Created</p>
+                <span className="text-xs">
                   {new Date(group.createdAt).toLocaleDateString()}
                 </span>
               </div>
-
               {/* Leave Group Button (only for members, not creator) */}
               {group.creator._id !== currentUser._id && group.members.some((m: any) => m._id === currentUser._id) && (
                 <Button
                   variant="destructive"
-                  className="w-full mt-4"
+                  className="w-full mt-2"
                   onClick={async () => {
                     if (!user) return;
                     const token = await user.getIdToken();
@@ -271,11 +264,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   Leave Group
                 </Button>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
     </>
   );
 }

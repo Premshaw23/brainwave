@@ -64,28 +64,28 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="w-6 h-6 text-indigo-600" />
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200">
+      <CardHeader className="pb-0">
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold text-indigo-700 tracking-tight">
+          <Brain className="w-7 h-7 text-indigo-600" />
           Generate AI Quiz
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-indigo-700">
           Create a personalized quiz from "{noteTitle}"
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8 pt-4">
         {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
+          <Alert className="bg-red-50 border-red-200">
+            <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
           </Alert>
         )}
 
         {/* Difficulty */}
         <div className="space-y-3">
-          <Label>Difficulty Level</Label>
+          <Label className="text-lg font-medium text-gray-800">Difficulty Level</Label>
           <Select value={difficulty} onValueChange={setDifficulty} disabled={loading}>
-            <SelectTrigger>
+            <SelectTrigger className="rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -114,7 +114,7 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         {/* Number of Questions */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <Label>Number of Questions</Label>
+            <Label className="text-lg font-medium text-gray-800">Number of Questions</Label>
             <span className="text-2xl font-bold text-indigo-600">{numQuestions[0]}</span>
           </div>
           <Slider
@@ -132,10 +132,10 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         </div>
 
         {/* Estimated Time */}
-        <div className="bg-indigo-50 rounded-lg p-4">
+        <div className="bg-indigo-50 rounded-xl p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-indigo-900">Estimated Time</p>
+              <p className="text-base font-medium text-indigo-900">Estimated Time</p>
               <p className="text-xs text-indigo-600 mt-1">Average per question: 1-2 minutes</p>
             </div>
             <div className="text-2xl font-bold text-indigo-600">
@@ -148,7 +148,7 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         <Button
           onClick={handleGenerate}
           disabled={loading || !user}
-          className="w-full"
+          className="w-full rounded-xl bg-indigo-600 text-white text-lg font-semibold py-3 shadow-lg hover:bg-indigo-700 transition-all duration-150"
           size="lg"
         >
           {loading ? <AppLoader message="Generating quiz..." /> : <><Zap className="w-5 h-5 mr-2" />Generate Quiz</>}

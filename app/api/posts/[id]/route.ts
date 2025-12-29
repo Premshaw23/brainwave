@@ -79,6 +79,7 @@ export async function GET(
         _id: post._id,
         author: {
           _id: post.userId._id,
+          firebaseUid: post.userId.firebaseUid,
           displayName: post.userId.displayName,
           avatar: post.userId.avatar,
           totalXP: post.userId.totalXP,
@@ -92,6 +93,7 @@ export async function GET(
           _id: comment._id,
           author: {
             _id: comment.userId._id,
+            firebaseUid: comment.userId.firebaseUid,
             displayName: comment.userId.displayName,
             avatar: comment.userId.avatar,
           },

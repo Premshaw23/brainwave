@@ -56,7 +56,7 @@ export default function Home() {
   ];
 
   const stats = [
-    { number: "50K+", label: "Active Students" },
+    { number: "5K+", label: "Active Students" },
     { number: "2M+", label: "Flashcards Created" },
     { number: "95%", label: "Success Rate" },
     { number: "4.9/5", label: "User Rating" }
@@ -106,7 +106,7 @@ export default function Home() {
           {/* Always show nav links at the top for both states */}
           <a href="#features" className="block text-gray-700 hover:text-indigo-600 font-medium py-2 transition-colors rounded-lg px-2" onClick={() => setMobileNavOpen(false)}>Features</a>
           <a href="#how-it-works" className="block text-gray-700 hover:text-indigo-600 font-medium py-2 transition-colors rounded-lg px-2" onClick={() => setMobileNavOpen(false)}>How It Works</a>
-          <a href="#testimonials" className="block text-gray-700 hover:text-indigo-600 font-medium py-2 transition-colors rounded-lg px-2" onClick={() => setMobileNavOpen(false)}>Reviews</a>
+          {/* <a href="#testimonials" className="block text-gray-700 hover:text-indigo-600 font-medium py-2 transition-colors rounded-lg px-2" onClick={() => setMobileNavOpen(false)}>Reviews</a> */}
           {/* <a href="#pricing" className="block text-gray-700 hover:text-indigo-600 font-medium py-2 transition-colors rounded-lg px-2" onClick={() => setMobileNavOpen(false)}>Pricing</a> */}
           <div className="my-2"></div>
           {user ? (
@@ -162,7 +162,7 @@ export default function Home() {
             <nav className="hidden lg:flex items-center gap-4 lg:gap-8">
               <a href="#features" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Features</a>
               <a href="#how-it-works" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">How It Works</a>
-              <a href="#testimonials" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Reviews</a>
+              {/* <a href="#testimonials" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Reviews</a> */}
               {/* <a href="#pricing" className="text-gray-700 hover:text-indigo-600 font-medium transition-colors">Pricing</a> */}
             </nav>
             <div className="hidden md:flex items-center gap-2 sm:gap-4 w-full md:w-auto justify-end md:justify-start mt-2 md:mt-0">
@@ -215,7 +215,7 @@ export default function Home() {
             <div className="text-center max-w-4xl mx-auto">
               <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-semibold mb-8">
                 <Sparkles className="w-4 h-4" />
-                Trusted by 50,000+ students worldwide
+                Trusted by 5000+ students worldwide
               </div>
               <h1 className="text-5xl lg:text-7xl font-extrabold leading-tight mb-6">
                 Master Any Subject with
@@ -358,7 +358,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="py-16 sm:py-24 lg:py-32 bg-linear-to-br from-indigo-50 to-purple-50">
+      {/* <section id="testimonials" className="py-16 sm:py-24 lg:py-32 bg-linear-to-br from-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-4">
@@ -394,7 +394,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA */}
       <section className="py-16 sm:py-24 lg:py-32 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">

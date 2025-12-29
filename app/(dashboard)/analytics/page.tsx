@@ -68,14 +68,14 @@ export default function AnalyticsPage() {
   const { overview, progress, velocity, recentActivity } = analyticsData;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-gray-600 mt-1">Track your learning progress and insights</p>
+    <div className="space-y-10">
+      <div className="bg-linear-to-r from-indigo-50 to-white rounded-xl p-6 shadow-sm mb-2">
+        <h1 className="text-4xl font-extrabold text-indigo-800 tracking-tight">Analytics</h1>
+        <p className="text-gray-600 mt-2 text-lg">Track your learning progress and insights</p>
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <StatsCard
           title="Total Quizzes"
           value={overview.totalQuizzes || 0}
@@ -103,28 +103,34 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Streak Card */}
-      <StreakCard
-        currentStreak={overview.streak || 0}
-        longestStreak={overview.longestStreak || overview.streak || 0}
-        lastActive={new Date().toISOString()}
-      />
+      <div className="mt-2">
+        <StreakCard
+          currentStreak={overview.streak || 0}
+          longestStreak={overview.longestStreak || overview.streak || 0}
+          lastActive={new Date().toISOString()}
+        />
+      </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ProgressChart data={progress} />
         <MasteryChart data={overview.masteryBySubject || []} />
       </div>
 
       {/* Secondary Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <LearningVelocity stats={velocity} />
         <WeakTopics topics={overview.masteryBySubject || []} />
       </div>
 
       {/* Recent Activity */}
-      <RecentActivity activities={recentActivity} />
+      <div className="bg-white/80 rounded-xl shadow p-6 border border-indigo-50">
+        <RecentActivity activities={recentActivity} />
+      </div>
 
-      <Leaderboard />
+      <div className="bg-white/80 rounded-xl shadow p-6 border border-indigo-50">
+        <Leaderboard />
+      </div>
     </div>
   );
 }

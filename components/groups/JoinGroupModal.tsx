@@ -64,33 +64,33 @@ export default function JoinGroupModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
-          <LinkIcon className="w-4 h-4 mr-2" />
+        <Button variant="outline" className="rounded-xl font-semibold px-6 py-3 shadow-md hover:bg-indigo-50">
+          <LinkIcon className="w-5 h-5 mr-2" />
           Join Group
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200">
         <DialogHeader>
-          <DialogTitle>Join Study Group</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-indigo-700 tracking-tight">Join Study Group</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert className="bg-red-50 border-red-200">
+              <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
             </Alert>
           )}
 
           {success && (
-            <Alert>
-              <AlertDescription className="text-green-600">
+            <Alert className="bg-green-50 border-green-200">
+              <AlertDescription className="text-green-600 font-medium">
                 {success}
               </AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="inviteCode">Invite Code</Label>
+            <Label htmlFor="inviteCode" className="text-lg font-medium text-gray-800">Invite Code</Label>
             <Input
               id="inviteCode"
               placeholder="e.g., ABC12XYZ"
@@ -98,7 +98,7 @@ export default function JoinGroupModal() {
               onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
               required
               disabled={loading}
-              className="font-mono text-lg tracking-wider"
+              className="font-mono text-lg tracking-wider rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
               maxLength={8}
             />
             <p className="text-xs text-gray-500">
@@ -106,7 +106,7 @@ export default function JoinGroupModal() {
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl bg-indigo-600 text-white text-lg font-semibold py-3 shadow-lg hover:bg-indigo-700 transition-all duration-150" disabled={loading}>
             {loading ? <AppLoader message="Joining group..." /> : 'Join Group'}
           </Button>
         </form>

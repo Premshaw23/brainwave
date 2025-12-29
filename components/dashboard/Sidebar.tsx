@@ -8,6 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Brain, Home, FileText, MessageSquare, Users, BarChart3, Settings, LogOut, CreditCard, Bookmark, User } from 'lucide-react';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 
 export default function Sidebar() {
@@ -34,32 +35,37 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="flex h-full w-64 flex-col bg-white border-r">
+    <div className="flex h-full w-68 flex-col bg-linear-to-br from-white via-indigo-50 to-indigo-100 border-r border-indigo-100 shadow-2xl rounded-r-2xl">
       {/* Logo as Home Button */}
-      <Link href="/" className="flex h-16 items-center gap-2 border-b px-6 hover:bg-gray-50 transition-colors">
-        <div className="bg-linear-to-r from-indigo-600 to-purple-600 p-2 rounded-lg">
-          <Brain className="w-6 h-6 text-white" />
+      <Link href="/" className="flex h-16 items-center gap-3 border-b border-indigo-100 px-8 bg-linear-to-r from-indigo-500 to-purple-500 hover:scale-[1.02] transition-all duration-200 rounded-br-2xl">
+        <div className="p-2 rounded-xl bg-white shadow-md">
+          <Image
+            src="/logo.png"
+            alt="BrainWave Logo"
+            width={30}
+            height={30}
+            className="object-contain drop-shadow-md"
+          />
         </div>
-        <span className="text-xl font-bold">BrainWave</span>
+        <span className="text-2xl font-extrabold text-white tracking-wide">BrainWave</span>
       </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-2 px-5 py-6">
         {navigation.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-4 rounded-xl px-5 py-3 text-base font-semibold transition-all duration-150 shadow-sm ${
                 isActive
-                  ? 'bg-indigo-50 text-indigo-600'
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-indigo-100 text-indigo-700 scale-[1.03]'
+                  : 'text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700'
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-6 h-6" />
               {item.name}
             </Link>
           );
@@ -67,19 +73,19 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t p-4 space-y-1">
+      <div className="border-t border-indigo-100 p-6 space-y-3 bg-white rounded-b-2xl shadow-md">
         <Link
           href="/settings"
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+          className="flex items-center gap-4 rounded-xl px-5 py-3 text-base font-semibold text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 shadow-sm"
         >
-          <Settings className="w-5 h-5" />
+          <Settings className="w-6 h-6" />
           Settings
         </Link>
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+          className="flex w-full items-center gap-4 rounded-xl px-5 py-3 text-base font-semibold text-red-600 hover:bg-red-50 shadow-sm"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-6 h-6" />
           Logout
         </button>
       </div>

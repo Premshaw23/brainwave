@@ -77,30 +77,32 @@ export default function ShareContentModal({
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>
         {trigger || (
-          <Button variant="outline">
-            <Share2 className="w-4 h-4 mr-2" />
+          <Button variant="outline" className="rounded-xl bg-linear-to-r from-indigo-100 via-white to-indigo-50 text-indigo-700 font-semibold shadow-md px-6 py-3">
+            <Share2 className="w-5 h-5 mr-2" />
             Share to Community
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md rounded-2xl bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl border border-indigo-100 p-8">
         <DialogHeader>
-          <DialogTitle>Share to Community</DialogTitle>
+          <DialogTitle className="text-indigo-700 font-bold text-xl">Share to Community</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="rounded-xl">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm font-medium text-gray-900 mb-1">
+          <div className="bg-indigo-50 rounded-xl p-4 shadow-sm">
+            <p className="text-base font-semibold text-indigo-700 mb-2">
               Sharing: {contentTitle}
             </p>
-            <Badge className="capitalize">{contentType}</Badge>
+            <Badge className="capitalize px-3 py-1 text-base font-semibold rounded-xl shadow-sm bg-indigo-100 text-indigo-700 border border-indigo-200 mt-1">
+              {contentType}
+            </Badge>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="caption">Caption (optional)</Label>
+            <Label htmlFor="caption" className="font-semibold text-indigo-700">Caption (optional)</Label>
             <Textarea
               id="caption"
               placeholder="Add a description or study tip..."
@@ -108,30 +110,31 @@ export default function ShareContentModal({
               onChange={(e) => setCaption(e.target.value)}
               disabled={loading}
               rows={4}
+              className="rounded-xl border border-indigo-200 bg-white shadow-sm text-base font-medium focus:ring-2 focus:ring-indigo-300 resize-none"
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-4 mt-4">
             <Button
               variant="outline"
               onClick={() => setModalOpen(false)}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 rounded-xl bg-white text-indigo-700 font-semibold shadow-sm border border-indigo-200 hover:bg-indigo-50"
             >
               Cancel
             </Button>
             <Button
               onClick={handleShare}
               disabled={loading}
-              className="flex-1"
+              className="flex-1 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-semibold shadow-md"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                   Sharing...
                 </>
               ) : (
                 <>
-                  <Share2 className="w-4 h-4 mr-2" />
+                  <Share2 className="w-5 h-5 mr-2" />
                   Share
                 </>
               )}

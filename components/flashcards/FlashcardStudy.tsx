@@ -95,51 +95,51 @@ export default function FlashcardStudy({
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto space-y-10 py-8 px-4">
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
+      <div className="space-y-3">
+        <div className="flex justify-between text-base text-gray-600 font-semibold">
           <span>Card {currentIndex + 1} of {cards.length}</span>
           <span>{Math.round(progress)}% Complete</span>
         </div>
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className="h-3 rounded-lg" />
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-gray-900">{sessionStats.studied}</p>
-            <p className="text-sm text-gray-600">Studied</p>
+      <div className="grid grid-cols-3 gap-8">
+        <Card className="rounded-xl shadow-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-3xl font-bold text-gray-900">{sessionStats.studied}</p>
+            <p className="text-base text-gray-600">Studied</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-green-600">{sessionStats.mastered}</p>
-            <p className="text-sm text-gray-600">Mastered</p>
+        <Card className="rounded-xl shadow-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-3xl font-bold text-green-600">{sessionStats.mastered}</p>
+            <p className="text-base text-gray-600">Mastered</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold text-orange-600">{sessionStats.needsReview}</p>
-            <p className="text-sm text-gray-600">Need Review</p>
+        <Card className="rounded-xl shadow-md">
+          <CardContent className="p-6 text-center">
+            <p className="text-3xl font-bold text-orange-600">{sessionStats.needsReview}</p>
+            <p className="text-base text-gray-600">Need Review</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Flashcard */}
-      <Card className="min-h-100 cursor-pointer" onClick={handleFlip}>
-        <CardContent className="flex items-center justify-center p-12">
-          <div className="text-center space-y-4">
-            <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">
+      <Card className="min-h-100 cursor-pointer bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200" onClick={handleFlip}>
+        <CardContent className="flex items-center justify-center p-16">
+          <div className="text-center space-y-6">
+            <div className="text-base font-semibold text-indigo-700 uppercase tracking-wide">
               {isFlipped ? 'Back' : 'Front'}
             </div>
-            <div className="text-2xl font-semibold text-gray-900 leading-relaxed">
+            <div className="text-3xl font-bold text-gray-900 leading-relaxed">
               {isFlipped ? currentCard.back : currentCard.front}
             </div>
             {!isFlipped && (
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-8">
-                <RotateCw className="w-4 h-4" />
+              <div className="flex items-center justify-center gap-3 text-base text-indigo-500 mt-8">
+                <RotateCw className="w-5 h-5" />
                 <span>Click to flip</span>
               </div>
             )}
@@ -148,31 +148,32 @@ export default function FlashcardStudy({
       </Card>
 
       {/* Controls */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-8">
         <Button
           variant="outline"
+          className="rounded-xl text-lg font-semibold px-6 py-3 shadow-md hover:bg-indigo-50"
           onClick={handlePrevious}
           disabled={currentIndex === 0}
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
+          <ChevronLeft className="w-5 h-5 mr-2" />
           Previous
         </Button>
 
         {isFlipped && (
-          <div className="flex gap-2">
+          <div className="flex gap-4">
             <Button
               variant="outline"
+              className="rounded-xl text-lg font-semibold px-6 py-3 text-orange-600 border-orange-600 hover:bg-orange-50 shadow-md"
               onClick={() => handleMastered(false)}
-              className="text-orange-600 border-orange-600 hover:bg-orange-50"
             >
-              <X className="w-4 h-4 mr-2" />
+              <X className="w-5 h-5 mr-2" />
               Need Review
             </Button>
             <Button
+              className="rounded-xl text-lg font-semibold px-6 py-3 bg-green-600 text-white shadow-md hover:bg-green-700"
               onClick={() => handleMastered(true)}
-              className="bg-green-600 hover:bg-green-700"
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-5 h-5 mr-2" />
               Mastered
             </Button>
           </div>
@@ -180,11 +181,12 @@ export default function FlashcardStudy({
 
         <Button
           variant="outline"
+          className="rounded-xl text-lg font-semibold px-6 py-3 shadow-md hover:bg-indigo-50"
           onClick={handleNext}
           disabled={currentIndex === cards.length - 1}
         >
           Next
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <ChevronRight className="w-5 h-5 ml-2" />
         </Button>
       </div>
     </div>

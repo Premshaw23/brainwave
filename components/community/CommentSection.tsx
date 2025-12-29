@@ -72,49 +72,53 @@ export default function CommentSection({ postId, initialComments }: CommentSecti
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-lg p-8 border border-indigo-100">
       {/* Comment Form */}
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-4 items-start mb-4">
         <Textarea
           placeholder="Add a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           disabled={loading}
           rows={2}
-          className="flex-1"
+          className="flex-1 rounded-xl border border-indigo-200 bg-white shadow-sm text-base font-medium focus:ring-2 focus:ring-indigo-300 resize-none"
         />
-        <Button type="submit" disabled={loading || !newComment.trim()}>
+        <Button
+          type="submit"
+          disabled={loading || !newComment.trim()}
+          className="rounded-xl h-12 w-12 flex items-center justify-center bg-indigo-500 hover:bg-indigo-600 text-white shadow-md"
+        >
           {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-6 h-6 animate-spin" />
           ) : (
-            <Send className="w-4 h-4" />
+            <Send className="w-6 h-6" />
           )}
         </Button>
       </form>
 
       {/* Comments List */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {comments.length === 0 ? (
-          <p className="text-center text-gray-500 py-8">
+          <p className="text-center text-indigo-400 py-10 text-lg font-semibold">
             No comments yet. Be the first to comment!
           </p>
         ) : (
           comments.map((comment) => (
-            <div key={comment._id} className="flex gap-3">
-              <Avatar className="w-8 h-8">
+            <div key={comment._id} className="flex gap-4 items-start">
+              <Avatar className="w-12 h-12 shadow-md">
                 <AvatarImage src={comment.author.avatar} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-indigo-200 text-indigo-700 font-bold">
                   {comment.author.displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <h4 className="font-semibold text-sm text-gray-900 mb-1">
+                <div className="bg-indigo-50 rounded-xl p-4 shadow-sm">
+                  <h4 className="font-semibold text-base text-indigo-700 mb-1">
                     {comment.author.displayName}
                   </h4>
-                  <p className="text-sm text-gray-700">{comment.text}</p>
+                  <p className="text-base text-gray-800 font-medium">{comment.text}</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1 ml-3">
+                <p className="text-xs text-gray-500 mt-2 ml-2">
                   {formatTimeAgo(comment.createdAt)}
                 </p>
               </div>

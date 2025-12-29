@@ -16,13 +16,13 @@ interface CommunityFiltersProps {
 export default function CommunityFilters({ subject, type, onSubjectChange, onTypeChange }: CommunityFiltersProps) {
   return (
     <div className="flex gap-4 items-center">
-      <Filter className="w-5 h-5 text-gray-500" />
+      <Filter className="w-5 h-5 text-indigo-500" />
       <Select value={subject} onValueChange={onSubjectChange}>
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-56 h-12 rounded-xl border border-indigo-200 bg-white shadow-sm text-base font-semibold focus:ring-2 focus:ring-indigo-300">
           <SelectValue placeholder="All Subjects" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Subjects</SelectItem>
+        <SelectContent className="rounded-xl shadow-lg bg-white border border-indigo-100">
+          <SelectItem value="all" className="text-indigo-700 font-semibold">All Subjects</SelectItem>
           <SelectItem value="mathematics">Mathematics</SelectItem>
           <SelectItem value="science">Science</SelectItem>
           <SelectItem value="history">History</SelectItem>
@@ -33,11 +33,11 @@ export default function CommunityFilters({ subject, type, onSubjectChange, onTyp
         </SelectContent>
       </Select>
       <Select value={type} onValueChange={onTypeChange}>
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-56 h-12 rounded-xl border border-indigo-200 bg-white shadow-sm text-base font-semibold focus:ring-2 focus:ring-indigo-300">
           <SelectValue placeholder="All Types" />
         </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
+        <SelectContent className="rounded-xl shadow-lg bg-white border border-indigo-100">
+          <SelectItem value="all" className="text-indigo-700 font-semibold">All Types</SelectItem>
           <SelectItem value="quiz">Quizzes</SelectItem>
           <SelectItem value="flashcard">Flashcards</SelectItem>
           <SelectItem value="note">Notes</SelectItem>

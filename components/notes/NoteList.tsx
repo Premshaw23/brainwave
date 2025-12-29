@@ -20,21 +20,17 @@ export default function NoteList() {
   }, []);
 
   const fetchNotes = async () => {
+    setLoading(true);
+    setError('');
     try {
       if (!user) throw new Error('Not authenticated');
       const token = await user.getIdToken();
       const response = await fetch('/api/notes', {
         headers: { Authorization: `Bearer ${token}` },
       });
-
+      if (!response.ok) throw new Error('Failed to fetch notes');
       const data = await response.json();
-
-      if (data.success) {
-        setNotes(data.notes);
-      } else {
-        setError(data.error || 'Failed to fetch notes');
-        showError(data.error || 'Failed to fetch notes');
-      }
+      setNotes(data.notes || []);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch notes');
       showError(err.message || 'Failed to fetch notes');
@@ -63,30 +59,40 @@ export default function NoteList() {
   };
 
   if (loading) {
-    return <AppLoader message="Loading notes..." />;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <AppLoader message="Loading notes..." />
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="max-w-2xl mx-auto py-8">
+        <Alert className="bg-red-50 border-red-200">
+          <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   if (notes.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">No notes yet. Upload your first note to get started!</p>
+      <div className="max-w-2xl mx-auto py-16">
+        <div className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-lg p-8 text-center">
+          <p className="text-indigo-700 text-lg font-semibold">No notes yet. Upload your first note to get started!</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {notes.map((note) => (
-        <NoteCard key={note._id} note={note} onDelete={handleDelete} />
-      ))}
+    <div className="w-full max-w-6xl py-8 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {notes.map((note) => (
+          <NoteCard key={note._id} note={note} onDelete={handleDelete} />
+        ))}
+      </div>
     </div>
   );
 }

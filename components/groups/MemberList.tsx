@@ -58,14 +58,14 @@ export default function MemberList({ groupId, members, creatorId }: MemberListPr
   }, [socket, groupId]);
 
   return (
-    <Card>
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200">
       <CardHeader>
-        <CardTitle className="text-lg">
+        <CardTitle className="text-xl font-bold text-indigo-700 tracking-tight">
           Members ({members.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {members.map((member) => {
             const isOnline = onlineUsers.has(member._id);
             const isCreator = member._id === creatorId;
@@ -73,10 +73,10 @@ export default function MemberList({ groupId, members, creatorId }: MemberListPr
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-sm hover:bg-indigo-50 transition-all duration-150"
               >
                 <div className="relative">
-                  <Avatar>
+                  <Avatar className="w-10 h-10 shadow-md">
                     <AvatarImage src={member.avatar} />
                     <AvatarFallback>
                       {member.displayName.charAt(0).toUpperCase()}
@@ -91,19 +91,19 @@ export default function MemberList({ groupId, members, creatorId }: MemberListPr
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-base font-semibold text-gray-900 truncate">
                       {member.displayName}
                     </p>
                     {isCreator && (
-                      <Crown className="w-4 h-4 text-yellow-600" />
+                      <Crown className="w-5 h-5 text-yellow-600" />
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm text-gray-500">
                     {member.totalXP.toLocaleString()} XP
                   </p>
                 </div>
 
-                <Badge variant={isOnline ? 'default' : 'outline'} className="text-xs">
+                <Badge variant={isOnline ? 'default' : 'outline'} className={`text-xs px-3 py-1 rounded-lg ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                   {isOnline ? 'Online' : 'Offline'}
                 </Badge>
               </div>

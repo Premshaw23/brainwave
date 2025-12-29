@@ -144,16 +144,16 @@ export default function Navbar() {
   };
 
   return (
-    <div className="flex h-16 py-2 items-center justify-between border-b bg-white px-6">
+    <div className="flex h-17 py-4 items-center justify-between border-b bg-linear-to-r from-indigo-50 via-white to-indigo-100 px-10 shadow-md">
       {/* Search */}
-      <div className="flex-1 max-w-lg">
+      <div className="flex-1 max-w-xl">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-indigo-400 pointer-events-none" />
           <Input
             ref={inputRef}
             type="search"
             placeholder="Search notes, quizzes..."
-            className="pl-11 pr-3 bg-gray-50 border border-gray-200 focus:bg-white focus:border-indigo-400 transition-colors shadow-sm h-11 rounded-xl text-base"
+            className="pl-14 pr-4 bg-white border border-indigo-200 focus:bg-indigo-50 focus:border-indigo-400 transition-colors shadow-lg h-12 rounded-2xl text-lg font-semibold"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onFocus={() => search && setShowDropdown(true)}
@@ -163,29 +163,29 @@ export default function Navbar() {
           />
           {search && (
             <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full focus:outline-none"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 p-2 rounded-full focus:outline-none bg-indigo-50 shadow-sm"
               onClick={() => { setSearch(''); setShowDropdown(false); inputRef.current?.focus(); }}
               tabIndex={-1}
               aria-label="Clear search"
             >
-              {/* <X className="w-5 h-5" /> */}
+              <X className="w-5 h-5" />
             </button>
           )}
           {/* Dropdown */}
           {showDropdown && (
             <div
               ref={dropdownRef}
-              className="absolute left-0 mt-2 w-full z-30"
+              className="absolute left-0 mt-3 w-full z-30"
             >
-              <Card className="rounded-xl border border-gray-200 shadow-lg bg-white p-0 overflow-hidden animate-fade-in">
+              <Card className="rounded-2xl border border-indigo-200 shadow-2xl bg-white p-0 overflow-hidden animate-fade-in">
                 {loading ? (
-                  <div className="p-6 flex flex-col items-center justify-center text-gray-500 text-sm">
-                    <Search className="w-7 h-7 mb-2 animate-spin" />
+                  <div className="p-8 flex flex-col items-center justify-center text-indigo-400 text-base font-semibold">
+                    <Search className="w-8 h-8 mb-3 animate-spin" />
                     Searching...
                   </div>
                 ) : results.length === 0 ? (
-                  <div className="p-6 flex flex-col items-center justify-center text-gray-400 text-sm">
-                    <Search className="w-7 h-7 mb-2" />
+                  <div className="p-8 flex flex-col items-center justify-center text-indigo-300 text-base font-semibold">
+                    <Search className="w-8 h-8 mb-3" />
                     No results found
                   </div>
                 ) : (
@@ -196,31 +196,31 @@ export default function Navbar() {
                       if (sectionResults.length === 0) return null;
                       return (
                         <div key={section}>
-                          <div className="px-4 pt-4 pb-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          <div className="px-6 pt-6 pb-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
                             {section === 'Note' && 'Notes'}
                             {section === 'Quiz' && 'Quizzes'}
                             {section === 'Flashcard' && 'Flashcards'}
                             {section === 'Post' && 'Posts'}
                           </div>
-                          <ul className="divide-y divide-gray-100">
+                          <ul className="divide-y divide-indigo-100">
                             {sectionResults.map((item, idx) => {
                               // Calculate global index for highlight
                               const globalIdx = results.findIndex(r => r === item);
                               return (
                                 <li
                                   key={item.href}
-                                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
-                                    highlighted === globalIdx ? 'bg-indigo-50' : 'hover:bg-gray-50'
-                                  }`}
+                                  className={`flex items-center gap-4 px-6 py-4 cursor-pointer transition-colors ${
+                                    highlighted === globalIdx ? 'bg-indigo-100' : 'hover:bg-indigo-50'
+                                  } rounded-xl`}
                                   onMouseEnter={() => setHighlighted(globalIdx)}
                                   onMouseDown={() => { window.location.href = item.href; setShowDropdown(false); }}
                                   tabIndex={-1}
                                 >
-                                  <span className={`inline-flex w-8 h-8 rounded-lg items-center justify-center text-lg font-bold ${
+                                  <span className={`inline-flex w-10 h-10 rounded-xl items-center justify-center text-xl font-bold shadow-sm ${
                                     item.type === 'Note'
                                       ? 'bg-green-100 text-green-600'
                                       : item.type === 'Quiz'
-                                      ? 'bg-indigo-100 text-indigo-600'
+                                      ? 'bg-indigo-200 text-indigo-700'
                                       : item.type === 'Flashcard'
                                       ? 'bg-yellow-100 text-yellow-600'
                                       : 'bg-pink-100 text-pink-600'
@@ -231,8 +231,8 @@ export default function Navbar() {
                                     {item.type === 'Post' && <span>💬</span>}
                                   </span>
                                   <div className="flex-1 min-w-0">
-                                    <div className="font-medium text-gray-900 text-sm truncate">{item.title}</div>
-                                    <div className="text-xs text-gray-500">{item.type}</div>
+                                    <div className="font-semibold text-indigo-700 text-base truncate">{item.title}</div>
+                                    <div className="text-xs text-indigo-400 font-semibold">{item.type}</div>
                                   </div>
                                 </li>
                               );
@@ -250,18 +250,18 @@ export default function Navbar() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-8">
         <NotificationBell />
-        <div className="flex items-center gap-3">
-          <Avatar>
+        <div className="flex items-center gap-4">
+          <Avatar className="w-12 h-12 shadow-md">
             <AvatarImage src={user?.avatar} />
-            <AvatarFallback>
+            <AvatarFallback className="bg-indigo-200 text-indigo-700 font-bold">
               {user?.displayName?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="hidden md:block">
-            <p className="text-sm font-medium">{user?.displayName}</p>
-            <p className="text-xs text-gray-500">{user?.email}</p>
+            <p className="text-lg font-bold text-indigo-700">{user?.displayName}</p>
+            <p className="text-sm text-indigo-400 font-semibold">{user?.email}</p>
           </div>
         </div>
       </div>

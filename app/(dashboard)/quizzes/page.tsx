@@ -56,19 +56,19 @@ export default function QuizzesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between bg-linear-to-r from-indigo-50 to-white rounded-xl p-6 shadow-sm mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Quizzes</h1>
-          <p className="text-gray-600 mt-1">Practice and test your knowledge</p>
+          <h1 className="text-4xl font-extrabold text-indigo-800 tracking-tight">My Quizzes</h1>
+          <p className="text-gray-600 mt-2 text-lg">Practice and test your knowledge</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4 items-center bg-white/80 rounded-lg p-4 border border-indigo-100 shadow-sm">
         <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-          <SelectTrigger className="w-48">
-            <Filter className="w-4 h-4 mr-2" />
+          <SelectTrigger className="w-56">
+            <Filter className="w-4 h-4 mr-2 text-indigo-500" />
             <SelectValue placeholder="All Subjects" />
           </SelectTrigger>
           <SelectContent>
@@ -81,7 +81,7 @@ export default function QuizzesPage() {
         </Select>
 
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-56">
             <SelectValue placeholder="All Difficulties" />
           </SelectTrigger>
           <SelectContent>
@@ -101,20 +101,18 @@ export default function QuizzesPage() {
 
       {/* Quiz List */}
       {quizzes.length === 0 ? (
-        <div className="text-center py-12">
-          <Brain className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No quizzes yet
-          </h3>
-          <p className="text-gray-600 mb-4">
+        <div className="flex flex-col items-center justify-center py-16 bg-white/80 rounded-xl border border-indigo-100 shadow-sm">
+          <Brain className="w-20 h-20 text-indigo-200 mb-6" />
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">No quizzes yet</h3>
+          <p className="text-gray-500 text-center max-w-md mb-8 text-base">
             Upload notes and generate your first AI-powered quiz!
           </p>
-          <Button onClick={() => window.location.href = '/notes'}>
+          <Button onClick={() => window.location.href = '/notes'} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg">
             Go to Notes
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {quizzes.map((quiz) => (
             <QuizCard key={quiz._id} quiz={quiz} />
           ))}

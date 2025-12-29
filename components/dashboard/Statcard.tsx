@@ -19,18 +19,18 @@ export default function StatsCard({
   color = 'bg-indigo-500',
 }: StatsCardProps) {
   return (
-    <Card>
-      <CardContent className="p-6">
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-xl rounded-2xl border border-indigo-100">
+      <CardContent className="p-8">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600">{title}</p>
-            <p className="text-3xl font-bold mt-2">{value}</p>
+            <p className="text-base font-semibold text-indigo-500 mb-1">{title}</p>
+            <p className="text-4xl font-extrabold text-indigo-700 mt-2">{value}</p>
             {trend && (
-              <p className="text-sm text-green-600 mt-1">{trend}</p>
+              <p className="text-sm text-green-600 mt-2 font-semibold">{trend}</p>
             )}
           </div>
-          <div className={`${color} p-3 rounded-lg`}>
-            <Icon className="w-6 h-6 text-white" />
+          <div className={`${color} p-4 rounded-xl shadow-md flex items-center justify-center`}>
+            <Icon className="w-8 h-8 text-white" />
           </div>
         </div>
       </CardContent>

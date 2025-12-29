@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Send ,Loader2 } from 'lucide-react';
+import { Send, Loader2, UserPlus, X, Check } from 'lucide-react';
 import AppLoader from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,15 +40,12 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Invite state and handler
+  // Invite modal state
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteError, setInviteError] = useState('');
-  const [inviteSuccess, setInviteSuccess] = useState(false);
 
   const handleInvite = async () => {
-    setInviteError('');
-    setInviteSuccess(false);
     if (!inviteEmail) return;
     setInviteLoading(true);
     try {
@@ -64,42 +61,39 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       });
       const data = await res.json();
       if (data.success) {
-        setInviteSuccess(true);
+        showSuccess('Invite sent successfully!');
         setInviteEmail('');
-        showSuccess('Invite sent!');
+        setShowInviteModal(false);
       } else {
-        setInviteError(data.error || 'Failed to send invite');
         showError(data.error || 'Failed to send invite');
       }
     } catch (err: any) {
-      setInviteError(err.message || 'Failed to send invite');
       showError(err.message || 'Failed to send invite');
     } finally {
       setInviteLoading(false);
-      setTimeout(() => setInviteSuccess(false), 2000);
     }
   };
 
-  // Fetch initial messages
   useEffect(() => {
     fetchMessages();
   }, [groupId]);
 
-  // Socket event listeners
+  // Auto-scroll to bottom whenever messages change
+  useEffect(() => {
+    if (!loading) scrollToBottom();
+  }, [messages, loading]);
+
   useEffect(() => {
     if (!socket || !groupId || !currentUserId) return;
 
-    // Always (re-)join group room when groupId or currentUserId changes
     socket.emit('join_group', { groupId });
 
-    // Listen for new messages
     const handleNewMessage = (message: Message) => {
       setMessages((prev) => [...prev, message]);
       scrollToBottom();
     };
     socket.on('new_message', handleNewMessage);
 
-    // Listen for typing indicators
     const handleUserTyping = ({ userId, displayName }: any) => {
       if (userId !== currentUserId) {
         setTypingUsers((prev) => new Set(prev).add(displayName));
@@ -110,7 +104,6 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     const handleTypingStopped = ({ userId }: any) => {
       setTypingUsers((prev) => {
         const updated = new Set(prev);
-        // Optionally remove by displayName if tracked
         return updated;
       });
     };
@@ -156,12 +149,10 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
     socket.emit('typing_start', { groupId });
 
-    // Clear existing timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
-    // Stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
       socket.emit('typing_stop', { groupId });
     }, 2000);
@@ -180,6 +171,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
     setNewMessage('');
     setSending(false);
+    setTimeout(scrollToBottom, 100); // Ensure scroll after sending
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -191,12 +183,6 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
   const formatTime = (date: string) => {
     const messageDate = new Date(date);
-    const now = new Date();
-    const diffMinutes = Math.floor((now.getTime() - messageDate.getTime()) / 60000);
-
-    if (diffMinutes < 1) return 'Just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    
     return messageDate.toLocaleTimeString('en-IN', {
       hour: 'numeric',
       minute: '2-digit',
@@ -204,114 +190,172 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     });
   };
 
+  const formatDate = (date: string) => {
+    const messageDate = new Date(date);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (messageDate.toDateString() === today.toDateString()) {
+      return 'Today';
+    } else if (messageDate.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    }
+    
+    return messageDate.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const shouldShowDateDivider = (index: number) => {
+    if (index === 0) return true;
+    const currentDate = new Date(messages[index].createdAt).toDateString();
+    const prevDate = new Date(messages[index - 1].createdAt).toDateString();
+    return currentDate !== prevDate;
+  };
+
   if (loading) {
     return <AppLoader message="Loading chat…" size="md" />;
   }
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg border">
-      {/* Header with Invite by Email on right */}
-      <div className="flex items-center justify-between border-b px-4 py-2">
-        <div className="font-semibold text-lg">Group Chat</div>
-        <div className="flex gap-2 items-center">
-          <Input
-            type="email"
-            placeholder="Invite by email..."
-            value={inviteEmail || ''}
-            onChange={e => setInviteEmail(e.target.value)}
-            disabled={inviteLoading}
-            className="w-48"
-          />
-          <Button
-            onClick={handleInvite}
-            disabled={!inviteEmail || inviteLoading}
-            variant="secondary"
-          >
-            {inviteLoading ? 'Sending...' : 'Invite'}
-          </Button>
-        </div>
+    <div className="flex flex-col h-full bg-linear-to-b from-white via-indigo-50 to-indigo-100">
+      {/* Minimal Header */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-indigo-100 bg-transparent">
+        <h2 className="font-semibold text-base text-indigo-700">Group Chat</h2>
+        <Button
+          onClick={() => setShowInviteModal(true)}
+          variant="ghost"
+          size="icon"
+          className="text-indigo-500 hover:text-indigo-700"
+        >
+          <UserPlus className="w-5 h-5" />
+        </Button>
       </div>
 
-      {/* Connection Status */}
-      {!isConnected && (
-        <div className="bg-yellow-50 border-b border-yellow-200 px-4 py-2 text-sm text-yellow-800">
-          Reconnecting...
-        </div>
-      )}
-
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-12">
-            <p>No messages yet. Start the conversation!</p>
-          </div>
-        ) : (
-          messages.map((message, index) => {
-            const isOwn = message.sender._id === currentUserId;
-            const showAvatar = 
-              index === 0 || 
-              messages[index - 1].sender._id !== message.sender._id;
-
-            return (
-              <div
-                key={message._id}
-                className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
-              >
-                {showAvatar ? (
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={message.sender.avatar} />
-                    <AvatarFallback>
-                      {message.sender.displayName.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <div className="w-8" />
-                )}
-
-                <div className={`flex-1 ${isOwn ? 'items-end' : 'items-start'}`}>
-                  {showAvatar && !isOwn && (
-                    <p className="text-xs font-medium text-gray-700 mb-1">
-                      {message.sender.displayName}
-                    </p>
-                  )}
-                  
-                  <div
-                    className={`inline-block max-w-md rounded-lg px-4 py-2 ${
-                      isOwn
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-900'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap wrap-break-word">
-                      {message.content}
-                    </p>
-                  </div>
-
-                  <p className={`text-xs text-gray-500 mt-1 ${isOwn ? 'text-right' : ''}`}>
-                    {formatTime(message.createdAt)}
-                  </p>
-                </div>
+      {/* Messages Area - visually focused */}
+      <div className="flex-1 overflow-y-auto px-0 py-4 flex flex-col items-center">
+        <div className="w-full max-w-2xl px-2">
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <p className="text-gray-500 text-sm">No messages yet</p>
+                <p className="text-gray-400 text-xs mt-1">Start the conversation!</p>
               </div>
-            );
-          })
-        )}
-
-        {/* Typing Indicator */}
-        {typingUsers.size > 0 && (
-          <div className="flex gap-3 text-gray-500 text-sm italic">
-            <div className="w-8" />
-            <p>
-              {Array.from(typingUsers).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing...
-            </p>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((message, index) => {
+                const isOwn = message.sender._id === currentUserId;
+                const showAvatar =
+                  !isOwn && (
+                    index === messages.length - 1 ||
+                    messages[index + 1]?.sender._id !== message.sender._id
+                  );
+                const showName =
+                  !isOwn && (
+                    index === 0 ||
+                    messages[index - 1].sender._id !== message.sender._id
+                  );
+                const isShortMessage = message.content.length < 40;
+                return (
+                  <div key={message._id} className="flex flex-col items-stretch">
+                    {shouldShowDateDivider(index) && (
+                      <div className="flex justify-center my-2">
+                        <div className="bg-indigo-100 text-indigo-700 rounded-full px-3 py-0.5 text-xs font-medium shadow-sm">
+                          {formatDate(message.createdAt)}
+                        </div>
+                      </div>
+                    )}
+                    <div className={`flex gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                      {!isOwn && (
+                        <div className="shrink-0 self-end">
+                          {showAvatar ? (
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={message.sender.avatar} />
+                              <AvatarFallback className="bg-indigo-200 text-indigo-700 text-xs">
+                                {message.sender.displayName.charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className="w-8" />
+                          )}
+                        </div>
+                      )}
+                      <div
+                        className={`relative rounded-2xl px-4 py-2 max-w-[80%] shadow-sm ${
+                          isOwn
+                            ? 'bg-indigo-600 text-white rounded-br-md'
+                            : 'bg-white text-gray-900 rounded-bl-md border border-indigo-100'
+                        }`}
+                      >
+                        {showName && (
+                          <p className="text-xs font-semibold mb-1" style={{ color: isOwn ? 'rgba(255,255,255,0.9)' : '#6366f1' }}>
+                            {message.sender.displayName}
+                          </p>
+                        )}
+                        {isShortMessage ? (
+                          <div className="flex items-end gap-2">
+                            <span className="text-sm wrap-break-word">{message.content}</span>
+                            <span 
+                              className={`text-[10px] shrink-0 self-end ${
+                                isOwn ? 'text-white/70' : 'text-gray-500'
+                              }`}
+                              style={{ lineHeight: '1.4' }}
+                            >
+                              {formatTime(message.createdAt)}
+                            </span>
+                            {isOwn && (
+                              <Check className="w-3 h-3 shrink-0 self-end text-white/70" style={{ marginBottom: '1px' }} />
+                            )}
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="text-sm wrap-break-word pb-5 pr-16">
+                              {message.content}
+                            </div>
+                            <div 
+                              className={`absolute bottom-2 right-4 flex items-center gap-1 ${
+                                isOwn ? 'text-white/70' : 'text-gray-500'
+                              }`}
+                            >
+                              <span className="text-[10px]">
+                                {formatTime(message.createdAt)}
+                              </span>
+                              {isOwn && (
+                                <Check className="w-3 h-3" />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {typingUsers.size > 0 && (
+                <div className="flex gap-2 items-center mt-2">
+                  <div className="w-8" />
+                  <div className="bg-white rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-indigo-100">
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Message Input Area */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
+      {/* Minimal Input Area */}
+      <div className="border-t border-indigo-100 bg-white/80 px-4 py-2">
+        <div className="flex items-center gap-2">
           <Input
             placeholder="Type a message..."
             value={newMessage}
@@ -321,11 +365,13 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
             }}
             onKeyPress={handleKeyPress}
             disabled={!isConnected || sending}
-            className="flex-1"
+            className="flex-1 bg-white/0 border-none focus:ring-0 text-base"
           />
           <Button
             onClick={handleSend}
             disabled={!isConnected || !newMessage.trim() || sending}
+            size="icon"
+            className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
           >
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -334,13 +380,78 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
             )}
           </Button>
         </div>
-        {inviteError && (
-          <div className="text-red-500 text-xs mt-1">{inviteError}</div>
-        )}
-        {inviteSuccess && (
-          <div className="text-green-600 text-xs mt-1">Invite sent!</div>
-        )}
       </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowInviteModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">Invite Member</h3>
+              <Button
+                onClick={() => {
+                  setShowInviteModal(false);
+                  setInviteEmail('');
+                }}
+                variant="ghost"
+                size="icon"
+                className="text-gray-500"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  placeholder="Enter email address"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && inviteEmail) {
+                      handleInvite();
+                    }
+                  }}
+                  disabled={inviteLoading}
+                  className="w-full"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex gap-2 justify-end">
+                <Button
+                  onClick={() => {
+                    setShowInviteModal(false);
+                    setInviteEmail('');
+                  }}
+                  variant="outline"
+                  disabled={inviteLoading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleInvite}
+                  disabled={!inviteEmail || inviteLoading}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  {inviteLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    'Send Invite'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

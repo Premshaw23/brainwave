@@ -43,13 +43,13 @@ export default function MasteryChart({ data }: MasteryChartProps) {
   }));
 
   return (
-    <Card>
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
       <CardHeader>
-        <CardTitle>Mastery by Subject</CardTitle>
-        <CardDescription>Your expertise level across different topics</CardDescription>
+        <CardTitle className="text-indigo-700 font-extrabold text-2xl">Mastery by Subject</CardTitle>
+        <CardDescription className="text-indigo-400 font-semibold">Your expertise level across different topics</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={320}>
           <PieChart>
             <Pie
               data={chartData}
@@ -57,7 +57,7 @@ export default function MasteryChart({ data }: MasteryChartProps) {
               cy="50%"
               labelLine={false}
               label={({ name, value }) => `${name}: ${value}%`}
-              outerRadius={100}
+              outerRadius={110}
               fill="#8884d8"
               dataKey="value"
             >
@@ -69,19 +69,19 @@ export default function MasteryChart({ data }: MasteryChartProps) {
           </PieChart>
         </ResponsiveContainer>
 
-        <div className="mt-4 space-y-2">
+        <div className="mt-6 space-y-3">
           {data.map((item, index) => (
-            <div key={`${item.subject}-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-3">
+            <div key={`${item.subject}-${index}`} className="flex items-center justify-between p-4 bg-indigo-50 rounded-xl shadow-sm">
+              <div className="flex items-center gap-4">
                 <div 
-                  className="w-3 h-3 rounded-full" 
+                  className="w-4 h-4 rounded-full shadow" 
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
-                <span className="text-sm font-medium capitalize">{item.subject}</span>
+                <span className="text-base font-semibold capitalize text-indigo-700">{item.subject}</span>
               </div>
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-gray-600">{item.attempts} attempts</span>
-                <span className="font-bold text-indigo-600">{item.mastery}%</span>
+              <div className="flex items-center gap-6 text-base">
+                <span className="text-indigo-400 font-semibold">{item.attempts} attempts</span>
+                <span className="font-extrabold text-indigo-700">{item.mastery}%</span>
               </div>
             </div>
           ))}

@@ -49,71 +49,68 @@ export default function GroupsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between bg-linear-to-r from-indigo-50 to-white rounded-xl p-6 shadow-sm mb-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Study Groups</h1>
-          <p className="text-gray-600 mt-1">Collaborate and learn together</p>
+          <h1 className="text-4xl font-extrabold text-indigo-800 tracking-tight">Study Groups</h1>
+          <p className="text-gray-600 mt-2 text-lg">Collaborate and learn together</p>
         </div>
-
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <JoinGroupModal />
           <CreateGroupModal />
         </div>
       </div>
 
       {groups.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <UsersIcon className="w-16 h-16 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No study groups yet
-            </h3>
-            <p className="text-gray-600 text-center max-w-md mb-6">
-              Create your first study group or join an existing one with an invite code
+        <Card className="border-2 border-dashed border-indigo-200 bg-white/80 shadow-none">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <UsersIcon className="w-20 h-20 text-indigo-200 mb-6" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No study groups yet</h3>
+            <p className="text-gray-500 text-center max-w-md mb-8 text-base">
+              Create your first study group or join an existing one with an invite code.
             </p>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <JoinGroupModal />
               <CreateGroupModal />
             </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {groups.map((group) => (
-            <Link key={group._id} href={`/groups/${group._id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6">
+            <Link key={group._id} href={`/groups/${group._id}`} className="group">
+              <Card className="hover:shadow-2xl hover:border-indigo-200 border border-gray-100 transition-all duration-200 cursor-pointer bg-linear-to-br from-white via-indigo-50 to-indigo-100 group-hover:scale-[1.03]">
+                <CardContent className="p-7">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                      <h3 className="text-xl font-bold text-indigo-900 mb-1 group-hover:text-indigo-700 transition-colors">
                         {group.name}
                       </h3>
                       {group.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
+                        <p className="text-sm text-gray-600 line-clamp-2 mb-1">
                           {group.description}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <UserPlus className="w-4 h-4" />
-                      <span>{group.memberCount} members</span>
+                      <UserPlus className="w-4 h-4 text-indigo-400" />
+                      <span className="font-medium">{group.memberCount} members</span>
                     </div>
-                    <Badge variant="outline">
+                    <Badge variant="outline" className="bg-indigo-50 border-indigo-200 text-indigo-700 font-semibold tracking-wider px-3 py-1 rounded-lg">
                       {group.inviteCode}
                     </Badge>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                  <div className="mt-6 pt-4 border-t border-indigo-100">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-lg font-bold text-indigo-700 shadow">
                         {group.creator.displayName.charAt(0).toUpperCase()}
                       </div>
                       <span className="text-xs text-gray-500">
-                        Created by {group.creator.displayName}
+                        Created by <span className="font-semibold text-indigo-700">{group.creator.displayName}</span>
                       </span>
                     </div>
                   </div>

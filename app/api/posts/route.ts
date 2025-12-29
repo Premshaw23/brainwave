@@ -127,7 +127,7 @@ export async function GET(request: NextRequest) {
     
     // Get posts and populate content
     const posts = await Post.find(query)
-      .populate('userId', 'displayName avatar')
+      .populate('userId', 'displayName avatar firebaseUid')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
@@ -184,6 +184,7 @@ export async function GET(request: NextRequest) {
           _id: post._id,
           author: {
             _id: post.userId._id,
+            firebaseUid: post.userId.firebaseUid,
             displayName: post.userId.displayName,
             avatar: post.userId.avatar,
           },

@@ -58,25 +58,25 @@ export default function CreateGroupModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Users className="w-4 h-4 mr-2" />
+        <Button className="rounded-xl bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-700 transition-all duration-150 px-6 py-3">
+          <Users className="w-5 h-5 mr-2" />
           Create Group
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200">
         <DialogHeader>
-          <DialogTitle>Create Study Group</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-indigo-700 tracking-tight">Create Study Group</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
+            <Alert className="bg-red-50 border-red-200">
+              <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="name">Group Name *</Label>
+            <Label htmlFor="name" className="text-lg font-medium text-gray-800">Group Name *</Label>
             <Input
               id="name"
               placeholder="e.g., Calculus Study Group"
@@ -84,11 +84,12 @@ export default function CreateGroupModal() {
               onChange={(e) => setName(e.target.value)}
               required
               disabled={loading}
+              className="rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-lg font-medium text-gray-800">Description</Label>
             <Textarea
               id="description"
               placeholder="What will this group study?"
@@ -96,42 +97,43 @@ export default function CreateGroupModal() {
               onChange={(e) => setDescription(e.target.value)}
               disabled={loading}
               rows={3}
+              className="rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Privacy</Label>
-            <div className="flex gap-2">
+            <Label className="text-lg font-medium text-gray-800">Privacy</Label>
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setIsPrivate(true)}
-                className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
+                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm ${
                   isPrivate
                     ? 'border-indigo-600 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Lock className="w-5 h-5 mx-auto mb-1 text-indigo-600" />
-                <p className="text-sm font-medium">Private</p>
+                <Lock className="w-6 h-6 mx-auto mb-1 text-indigo-600" />
+                <p className="text-base font-medium">Private</p>
                 <p className="text-xs text-gray-500">Invite only</p>
               </button>
               <button
                 type="button"
                 onClick={() => setIsPrivate(false)}
-                className={`flex-1 p-3 rounded-lg border-2 transition-colors ${
+                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm ${
                   !isPrivate
                     ? 'border-indigo-600 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <Globe className="w-5 h-5 mx-auto mb-1 text-indigo-600" />
-                <p className="text-sm font-medium">Public</p>
+                <Globe className="w-6 h-6 mx-auto mb-1 text-indigo-600" />
+                <p className="text-base font-medium">Public</p>
                 <p className="text-xs text-gray-500">Anyone can join</p>
               </button>
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl bg-indigo-600 text-white text-lg font-semibold py-3 shadow-lg hover:bg-indigo-700 transition-all duration-150" disabled={loading}>
             {loading ? 'Creating...' : 'Create Group'}
           </Button>
         </form>

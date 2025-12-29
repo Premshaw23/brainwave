@@ -17,6 +17,7 @@ interface PostCardProps {
       _id: string;
       displayName: string;
       avatar?: string;
+      firebaseUid?: string;
     };
     contentType: 'quiz' | 'flashcard' | 'note' | 'screenshot' | 'summary';
     content: any;
@@ -104,29 +105,43 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
     if (difficulty === 'medium') return 'bg-yellow-100 text-yellow-800';
     return 'bg-red-100 text-red-800';
   };
-
+  console.log(`/profile/${post.author.firebaseUid}`);
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200 hover:shadow-indigo-200/50 transition-all duration-200">
+      <CardContent className="p-2 px-8">
         {/* Author Header */}
-        <div className="flex items-center gap-3 mb-4">
-
-          <Link href={`/profile/${post.author._id}`}>
-            <Avatar className="cursor-pointer">
+        <div className="flex items-center gap-4 mb-6">
+          {post.author.firebaseUid ? (
+            <Link href={`/profile/${post.author.firebaseUid}`}>
+              <Avatar className="cursor-pointer w-10 h-10 shadow-md">
+                <AvatarImage src={post.author.avatar} />
+                <AvatarFallback>
+                  {post.author.displayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+          ) : (
+            <Avatar className="w-10 h-10 shadow-md">
               <AvatarImage src={post.author.avatar} />
               <AvatarFallback>
                 {post.author.displayName.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-          </Link>
+          )}
           <div className="flex-1">
-            <Link href={`/profile/${post.author._id}`}>
-              <h4 className="font-semibold text-gray-900 hover:text-indigo-600">
+            {post.author.firebaseUid ? (
+              <Link href={`/profile/${post.author.firebaseUid}`}>
+                <h4 className="font-bold text-gray-900 hover:text-indigo-700 text-lg tracking-tight">
+                  {post.author.displayName}
+                </h4>
+              </Link>
+            ) : (
+              <h4 className="font-bold text-gray-900 text-lg tracking-tight">
                 {post.author.displayName}
               </h4>
-            </Link>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <Calendar className="w-3 h-3" />
+            )}
+            <div className="flex items-center gap-3 text-sm text-gray-500 mt-1">
+              <Calendar className="w-4 h-4" />
               {formatTimeAgo(post.createdAt)}
               {/* Bookmark Button */}
               <Button
@@ -147,7 +162,6 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
                       body: JSON.stringify({ postId: post._id }),
                     });
                     const data = await response.json();
-                    // console.log('[PostCard] POST /api/bookmarks response:', data);
                     if (data.success) {
                       setBookmarked(data.isBookmarked);
                     } else {
@@ -161,10 +175,10 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
                 }}
                 className={bookmarked ? 'text-indigo-600' : 'text-gray-600'}
               >
-                <Bookmark className="w-4 h-4" fill={bookmarked ? 'currentColor' : 'none'} />
+                <Bookmark className="w-5 h-5" fill={bookmarked ? 'currentColor' : 'none'} />
               </Button>
             </div>
-            <Badge variant="outline" className="capitalize">
+            <Badge variant="outline" className="capitalize px-3 py-1 text-base font-semibold rounded-xl shadow-sm bg-indigo-50 text-indigo-700 border border-indigo-200 mt-2">
               {post.contentType}
             </Badge>
           </div>
@@ -172,7 +186,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
 
         {/* Caption */}
         {post.caption && (
-          <p className="text-gray-700 mb-4">{post.caption}</p>
+          <p className="text-gray-700 mb-6 text-base font-medium">{post.caption}</p>
         )}
 
         {/* Content Preview */}
@@ -250,13 +264,13 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
         )}
 
         {/* Actions */}
-        <div className="flex items-center gap-4 pt-4 border-t">
+        <div className="flex items-center gap-6 pt-6 border-t">
           {/* Post Deletion Button (owner only) */}
           {currentUserId === post.author._id && (
             <Button
               variant="ghost"
               size="sm"
-              className="text-red-600"
+              className="rounded-lg text-red-600 font-semibold shadow-sm hover:bg-red-50"
               onClick={async () => {
                 if (window.confirm('Delete this post? This cannot be undone.')) {
                   if (!user) return;
@@ -269,36 +283,36 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
                 }
               }}
             >
-              <Trash2 className="w-4 h-4" />
+              <Trash2 className="w-5 h-5" />
             </Button>
           )}
           <Button
             variant="ghost"
             size="sm"
+            className={`rounded-lg font-semibold shadow-sm ${liked ? 'text-red-600' : 'text-gray-600'} hover:bg-indigo-50`}
             onClick={handleLike}
             disabled={liking}
-            className={liked ? 'text-red-600' : 'text-gray-600'}
           >
-            <Heart className={`w-4 h-4 mr-1 ${liked ? 'fill-current' : ''}`} />
+            <Heart className={`w-5 h-5 mr-2 ${liked ? 'fill-current' : ''}`} />
             {likeCount}
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
+            className="rounded-lg font-semibold shadow-sm text-gray-600 hover:bg-indigo-50"
             onClick={() => onComment?.(post._id)}
-            className="text-gray-600"
           >
-            <MessageCircle className="w-4 h-4 mr-1" />
+            <MessageCircle className="w-5 h-5 mr-2" />
             {post.commentCount}
           </Button>
 
           <Button
             variant="ghost"
             size="sm"
-            className="text-gray-600 ml-auto"
+            className="rounded-lg font-semibold shadow-sm text-gray-600 ml-auto hover:bg-indigo-50"
           >
-            <Share2 className="w-4 h-4" />
+            <Share2 className="w-5 h-5" />
           </Button>
         </div>
       </CardContent>

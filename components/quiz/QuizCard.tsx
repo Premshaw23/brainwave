@@ -44,14 +44,14 @@ export default function QuizCard({ quiz }: QuizCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200 hover:scale-[1.03] hover:shadow-indigo-200/50 transition-all duration-200">
+      <CardContent className="p-8">
+        <div className="flex items-start justify-between mb-8">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">
               {quiz.title}
             </h3>
-            <div className="flex items-center gap-3 text-sm text-gray-500">
+            <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
                 {formatDate(quiz.createdAt)}
@@ -64,16 +64,18 @@ export default function QuizCard({ quiz }: QuizCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
           <div className="flex gap-2">
-            <Badge className="capitalize">{quiz.subject}</Badge>
-            <Badge className={difficultyColors[quiz.difficulty]} variant="outline">
+            <Badge className="capitalize px-3 py-1 text-base font-semibold rounded-xl shadow-sm bg-indigo-50 text-indigo-700 border border-indigo-200">
+              {quiz.subject}
+            </Badge>
+            <Badge className={difficultyColors[quiz.difficulty] + ' px-3 py-1 text-base font-semibold rounded-xl shadow-sm'} variant="outline">
               {quiz.difficulty}
             </Badge>
           </div>
           <div className="flex gap-2 items-center">
             <Link href={`/quizzes/${quiz._id}/take`}>
-              <Button>
+              <Button className="rounded-lg bg-indigo-600 text-white font-semibold shadow-md hover:bg-indigo-700 transition-all duration-150 px-6">
                 <Brain className="w-4 h-4 mr-2" />
                 Take Quiz
               </Button>
@@ -83,18 +85,16 @@ export default function QuizCard({ quiz }: QuizCardProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-600"
+                className="rounded-lg text-red-600 font-semibold shadow-sm hover:bg-red-50"
                 onClick={async () => {
                   if (window.confirm('Delete this quiz? This cannot be undone.')) {
                     if (!user) return;
                     const token = await user.getIdToken();
-                    console.log('Deleting quiz:', quiz._id, 'with token:', token);
                     const res = await fetch(`/api/quizzes/${quiz._id}`, {
                       method: 'DELETE',
                       headers: { Authorization: `Bearer ${token}` },
                     });
                     const data = await res.json();
-                    console.log('Delete response:', res.status, data);
                     if (res.ok) {
                       window.location.reload();
                     } else {

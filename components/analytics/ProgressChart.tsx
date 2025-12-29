@@ -48,49 +48,49 @@ export default function ProgressChart({ data }: ProgressChartProps) {
   };
 
   return (
-    <Card>
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
       <CardHeader>
-        <CardTitle>Performance Over Time</CardTitle>
-        <CardDescription>Track your learning progress day by day</CardDescription>
-        <Button variant="outline" size="sm" className="mt-2 ml-2" onClick={handleDataShare}>
-          <Share2 className="w-4 h-4 mr-1" />
+        <CardTitle className="text-indigo-700 font-extrabold text-2xl">Performance Over Time</CardTitle>
+        <CardDescription className="text-indigo-400 font-semibold">Track your learning progress day by day</CardDescription>
+        <Button variant="outline" size="sm" className="mt-4 ml-2 rounded-xl bg-indigo-50 text-indigo-700 font-semibold shadow px-4 py-2" onClick={handleDataShare}>
+          <Share2 className="w-5 h-5 mr-2" />
           Share Data
         </Button>
       </CardHeader>
       <CardContent>
-        <div>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="pt-2">
+          <ResponsiveContainer width="100%" height={320}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#c7d2fe" />
               <XAxis 
                 dataKey="date" 
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
+                stroke="#6366f1"
+                style={{ fontSize: '14px', fontWeight: 600 }}
               />
               <YAxis 
-                stroke="#6b7280"
-                style={{ fontSize: '12px' }}
+                stroke="#6366f1"
+                style={{ fontSize: '14px', fontWeight: 600 }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend 
-                wrapperStyle={{ fontSize: '14px' }}
+                wrapperStyle={{ fontSize: '16px', fontWeight: 700, color: '#6366f1' }}
               />
               <Line 
                 type="monotone" 
                 dataKey="score" 
-                stroke="#4f46e5" 
-                strokeWidth={3}
+                stroke="#6366f1" 
+                strokeWidth={4}
                 name="Average Score (%)"
-                dot={{ fill: '#4f46e5', r: 4 }}
-                activeDot={{ r: 6 }}
+                dot={{ fill: '#6366f1', r: 5 }}
+                activeDot={{ r: 8 }}
               />
               <Line 
                 type="monotone" 
                 dataKey="quizzes" 
                 stroke="#10b981" 
-                strokeWidth={2}
+                strokeWidth={3}
                 name="Quizzes Taken"
-                dot={{ fill: '#10b981', r: 3 }}
+                dot={{ fill: '#10b981', r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>

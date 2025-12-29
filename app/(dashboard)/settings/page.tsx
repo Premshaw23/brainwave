@@ -119,10 +119,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1">Manage your account and preferences</p>
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div className="bg-linear-to-r from-indigo-50 to-white rounded-xl p-6 shadow-sm mb-2">
+        <h1 className="text-4xl font-extrabold text-indigo-800 tracking-tight">Settings</h1>
+        <p className="text-gray-600 mt-2 text-lg">Manage your account and preferences</p>
       </div>
 
       {success && (
@@ -138,20 +138,20 @@ export default function SettingsPage() {
       )}
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="profile">
+        <TabsList className="grid w-full grid-cols-4 bg-indigo-50 border border-indigo-100 rounded-lg mb-4">
+          <TabsTrigger value="profile" className="data-[state=active]:bg-white data-[state=active]:text-indigo-800">
             <User className="w-4 h-4 mr-2" />
             Profile
           </TabsTrigger>
-          <TabsTrigger value="notifications">
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-white data-[state=active]:text-indigo-800">
             <Bell className="w-4 h-4 mr-2" />
             Notifications
           </TabsTrigger>
-          <TabsTrigger value="preferences">
+          <TabsTrigger value="preferences" className="data-[state=active]:bg-white data-[state=active]:text-indigo-800">
             <Palette className="w-4 h-4 mr-2" />
             Preferences
           </TabsTrigger>
-          <TabsTrigger value="security">
+          <TabsTrigger value="security" className="data-[state=active]:bg-white data-[state=active]:text-indigo-800">
             <Lock className="w-4 h-4 mr-2" />
             Security
           </TabsTrigger>
@@ -159,9 +159,9 @@ export default function SettingsPage() {
 
         {/* Profile Tab */}
         <TabsContent value="profile">
-          <Card>
+          <Card className="border border-indigo-100 bg-white/90">
             <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
+              <CardTitle className="text-indigo-800">Profile Information</CardTitle>
               <CardDescription>Update your public profile details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -201,7 +201,7 @@ export default function SettingsPage() {
                 <Label>Study Interests</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {studyInterests.map((interest) => (
-                    <Badge key={interest} className="capitalize">
+                    <Badge key={interest} className="capitalize bg-indigo-50 text-indigo-700 border border-indigo-200">
                       {interest}
                       <button
                         onClick={() => removeInterest(interest)}
@@ -219,6 +219,7 @@ export default function SettingsPage() {
                         key={subject}
                         variant="outline"
                         size="sm"
+                        className="border-indigo-200 text-indigo-700"
                         onClick={() => addInterest(subject.toLowerCase())}
                       >
                         + {subject}
@@ -228,7 +229,7 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <Button onClick={handleSaveProfile} disabled={saving}>
+              <Button onClick={handleSaveProfile} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg">
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -247,9 +248,9 @@ export default function SettingsPage() {
 
         {/* Notifications Tab */}
         <TabsContent value="notifications">
-          <Card>
+          <Card className="border border-indigo-100 bg-white/90">
             <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
+              <CardTitle className="text-indigo-800">Notification Preferences</CardTitle>
               <CardDescription>Choose what notifications you receive</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -286,7 +287,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <Button>
+              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg">
                 <Save className="w-4 h-4 mr-2" />
                 Save Preferences
               </Button>
@@ -296,9 +297,9 @@ export default function SettingsPage() {
 
         {/* Preferences Tab */}
         <TabsContent value="preferences">
-          <Card>
+          <Card className="border border-indigo-100 bg-white/90">
             <CardHeader>
-              <CardTitle>App Preferences</CardTitle>
+              <CardTitle className="text-indigo-800">App Preferences</CardTitle>
               <CardDescription>Customize your experience</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -312,7 +313,7 @@ export default function SettingsPage() {
 
               <div className="space-y-2">
                 <Label>Default Study Subject</Label>
-                <select className="w-full p-2 border rounded-lg">
+                <select className="w-full p-2 border rounded-lg border-indigo-200">
                   <option>All Subjects</option>
                   <option>Mathematics</option>
                   <option>Science</option>
@@ -325,9 +326,9 @@ export default function SettingsPage() {
 
         {/* Security Tab */}
         <TabsContent value="security">
-          <Card>
+          <Card className="border border-indigo-100 bg-white/90">
             <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
+              <CardTitle className="text-indigo-800">Security Settings</CardTitle>
               <CardDescription>Manage your account security</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -336,7 +337,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-gray-500 mb-4">
                   Your password is managed through Firebase Authentication
                 </p>
-                <Button variant="outline">Change Password</Button>
+                <Button variant="outline" className="border-indigo-200 text-indigo-700">Change Password</Button>
               </div>
 
               <div>
@@ -344,7 +345,7 @@ export default function SettingsPage() {
                 <p className="text-sm text-gray-500 mb-4">
                   Permanently delete your account and all data
                 </p>
-                <Button variant="destructive">Delete Account</Button>
+                <Button variant="destructive" className="w-full">Delete Account</Button>
               </div>
             </CardContent>
           </Card>
