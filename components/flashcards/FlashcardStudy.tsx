@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '../../context/AuthContext';
+import { showError } from '@/lib/toast';
 
 interface FlashcardStudyProps {
   flashcardId: string;
@@ -75,7 +76,7 @@ export default function FlashcardStudy({
         onComplete?.();
       }
     } catch (error) {
-      console.error('Failed to update review:', error);
+      showError('Failed to update review');
     }
   };
 

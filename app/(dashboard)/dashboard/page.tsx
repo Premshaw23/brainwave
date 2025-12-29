@@ -4,6 +4,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import AppLoader from '@/components/ui/AppLoader';
+import { showError } from '@/lib/toast';
 import { useAuth } from './../../../context/AuthContext';
 import StatsCard from '@/components/dashboard/Statcard';
 import { Brain, Target, Flame, Trophy, TrendingUp, Calendar } from 'lucide-react';
@@ -36,13 +38,14 @@ export default function DashboardPage() {
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
+      showError('Failed to fetch stats. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <AppLoader message="Loading dashboard…" />;
   }
 
   const getStreakMessage = () => {

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 import { Slider } from '@/components/ui/slider';
 import { useAuth } from '../../context/AuthContext';
 
@@ -52,9 +53,11 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         router.push(`/quizzes/${data.quizId}/take`);
       } else {
         setError(data.error || 'Failed to generate quiz');
+        showError(data.error || 'Failed to generate quiz');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to generate quiz');
+      showError(err.message || 'Failed to generate quiz');
     } finally {
       setLoading(false);
     }

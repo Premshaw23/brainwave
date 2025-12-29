@@ -68,7 +68,6 @@ export default function UserProfilePage({ params }: { params: Promise<{ id: stri
     setEditLoading(true);
     setEditError('');
     try {
-      const { user } = useAuth();
       if (!user) return;
       const token = await user.getIdToken();
       const res = await fetch('/api/auth/profile', {

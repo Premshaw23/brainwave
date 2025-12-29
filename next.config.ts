@@ -13,12 +13,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'lh3.googleusercontent.com',
+        hostname: 'uz0u0nepdgh9fssk.public.blob.vercel-storage.com',
       },
-      {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-      },
+      // add more remotePatterns as needed
     ],
   },
   compress: true,

@@ -34,14 +34,14 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="flex h-full py-2 w-64 flex-col bg-white border-r">
-      {/* Logo */}
-      <div className="flex h-16 items-center gap-2 border-b px-6">
+    <div className="flex h-full w-64 flex-col bg-white border-r">
+      {/* Logo as Home Button */}
+      <Link href="/" className="flex h-16 items-center gap-2 border-b px-6 hover:bg-gray-50 transition-colors">
         <div className="bg-linear-to-r from-indigo-600 to-purple-600 p-2 rounded-lg">
           <Brain className="w-6 h-6 text-white" />
         </div>
         <span className="text-xl font-bold">BrainWave</span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4">

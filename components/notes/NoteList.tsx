@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import NoteCard from './NoteCard';
 import AppLoader from '@/components/ui/AppLoader';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 
 export default function NoteList() {
   const { user } = useAuth();
@@ -32,9 +33,11 @@ export default function NoteList() {
         setNotes(data.notes);
       } else {
         setError(data.error || 'Failed to fetch notes');
+        showError(data.error || 'Failed to fetch notes');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch notes');
+      showError(err.message || 'Failed to fetch notes');
     } finally {
       setLoading(false);
     }
@@ -55,7 +58,7 @@ export default function NoteList() {
         setNotes(notes.filter((note) => note._id !== id));
       }
     } catch (err) {
-      console.error('Delete failed:', err);
+      showError('Delete failed');
     }
   };
 

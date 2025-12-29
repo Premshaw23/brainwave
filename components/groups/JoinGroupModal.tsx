@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 
 export default function JoinGroupModal() {
   const { user } = useAuth();
@@ -50,9 +51,11 @@ export default function JoinGroupModal() {
         }, 1000);
       } else {
         setError(data.error || 'Failed to join group');
+        showError(data.error || 'Failed to join group');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to join group');
+      showError(err.message || 'Failed to join group');
     } finally {
       setLoading(false);
     }

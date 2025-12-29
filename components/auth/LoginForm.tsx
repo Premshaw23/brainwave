@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export default function LoginForm() {
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login');
+      showError(err.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
@@ -47,6 +49,7 @@ export default function LoginForm() {
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login with Google');
+      showError(err.message || 'Failed to login with Google');
     } finally {
       setLoading(false);
     }

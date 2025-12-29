@@ -1,6 +1,8 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import AppLoader from '@/components/ui/AppLoader';
+import { showError } from '@/lib/toast';
 import { useAuth } from '../../../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Loader2, Sparkles } from 'lucide-react';
@@ -57,15 +59,17 @@ export default function GenerateFlashcardsPage({ params }: { params: Promise<{ i
         router.push(`/flashcards/${data.flashcardSetId}/study`);
       } else {
         setError(data.error || 'Failed to generate flashcards');
+        showError(data.error || 'Failed to generate flashcards');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to generate flashcards');
+      showError(err.message || 'Failed to generate flashcards');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!note) return <div>Loading...</div>;
+  if (!note) return <AppLoader message="Loading note…" />;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

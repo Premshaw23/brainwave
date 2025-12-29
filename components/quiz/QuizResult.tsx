@@ -103,9 +103,9 @@ export default function QuizResults({
             <div key={index} className="border-b pb-6 last:border-0 last:pb-0">
               <div className="flex items-start gap-3 mb-3">
                 {result.isCorrect ? (
-                  <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-1" />
+                  <CheckCircle2 className="w-6 h-6 text-green-600 shrink-0 mt-1" />
                 ) : (
-                  <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" />
+                  <XCircle className="w-6 h-6 text-red-600 shrink-0 mt-1" />
                 )}
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 mb-2">

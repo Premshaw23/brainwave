@@ -51,7 +51,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        console.log('[PostCard] GET /api/bookmarks response:', data);
+        // console.log('[PostCard] GET /api/bookmarks response:', data);
         if (data.success && Array.isArray(data.bookmarks)) {
           // bookmarks can be array of posts or post ids
           const ids = data.bookmarks.map((b: any) => String(b._id || b));
@@ -147,7 +147,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
                       body: JSON.stringify({ postId: post._id }),
                     });
                     const data = await response.json();
-                    console.log('[PostCard] POST /api/bookmarks response:', data);
+                    // console.log('[PostCard] POST /api/bookmarks response:', data);
                     if (data.success) {
                       setBookmarked(data.isBookmarked);
                     } else {

@@ -6,6 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { showError, showSuccess } from '@/lib/toast';
 import { User, Bell, Lock, Palette, Save, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,12 +86,15 @@ export default function SettingsPage() {
 
       if (data.success) {
         setSuccess('Profile updated successfully!');
+        showSuccess('Profile updated successfully!');
         setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(data.error || 'Failed to update profile');
+        showError(data.error || 'Failed to update profile');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to update profile');
+      showError(err.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }

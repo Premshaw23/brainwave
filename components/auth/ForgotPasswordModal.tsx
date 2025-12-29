@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 
 interface ForgotPasswordModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export default function ForgotPasswordModal({ open, onClose }: ForgotPasswordMod
       setSent(true);
     } catch (err: any) {
       setError(err.message || 'Failed to send reset email');
+      showError(err.message || 'Failed to send reset email');
     } finally {
       setLoading(false);
     }

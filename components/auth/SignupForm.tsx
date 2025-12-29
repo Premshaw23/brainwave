@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 
 
 export default function SignupForm() {
@@ -56,9 +57,11 @@ export default function SignupForm() {
         router.push('/dashboard');
       } else {
         setError(data.error || 'Registration failed');
+        showError(data.error || 'Registration failed');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
+      showError(err.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -85,9 +88,11 @@ export default function SignupForm() {
         router.push('/dashboard');
       } else {
         setError(data.error || 'Signup failed');
+        showError(data.error || 'Signup failed');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to signup with Google');
+      showError(err.message || 'Failed to signup with Google');
     } finally {
       setLoading(false);
     }

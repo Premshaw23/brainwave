@@ -3,11 +3,13 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Send, Loader2 } from 'lucide-react';
+import { Send ,Loader2 } from 'lucide-react';
+import AppLoader from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSocket } from '@/lib/socket';
+import { showError, showSuccess } from '@/lib/toast';
 
 interface Message {
   _id: string;
@@ -64,11 +66,14 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       if (data.success) {
         setInviteSuccess(true);
         setInviteEmail('');
+        showSuccess('Invite sent!');
       } else {
         setInviteError(data.error || 'Failed to send invite');
+        showError(data.error || 'Failed to send invite');
       }
     } catch (err: any) {
       setInviteError(err.message || 'Failed to send invite');
+      showError(err.message || 'Failed to send invite');
     } finally {
       setInviteLoading(false);
       setTimeout(() => setInviteSuccess(false), 2000);
@@ -131,9 +136,12 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       if (data.success) {
         setMessages(data.messages);
         setTimeout(scrollToBottom, 100);
+      } else {
+        showError(data.error || 'Failed to fetch messages');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch messages:', error);
+      showError(error.message || 'Failed to fetch messages');
     } finally {
       setLoading(false);
     }
@@ -197,11 +205,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
+    return <AppLoader message="Loading chat…" size="md" />;
   }
 
   return (

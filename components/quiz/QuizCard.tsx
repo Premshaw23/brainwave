@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { showError } from '@/lib/toast';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Brain, Clock, Target, Calendar, Trash2 } from 'lucide-react';
@@ -97,7 +98,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
                     if (res.ok) {
                       window.location.reload();
                     } else {
-                      alert(data.error || 'Failed to delete quiz');
+                      showError(data.error || 'Failed to delete quiz');
                     }
                   }
                 }}

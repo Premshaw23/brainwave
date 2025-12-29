@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { showError } from '@/lib/toast';
 import { useAuth } from '../../context/AuthContext';
 
 const SUBJECTS = [
@@ -102,9 +103,11 @@ export default function NoteUpload() {
         router.push(`/notes/${data.noteId}`);
       } else {
         setError(data.error || 'Upload failed');
+        showError(data.error || 'Upload failed');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to upload note');
+      showError(err.message || 'Failed to upload note');
     } finally {
       setLoading(false);
     }

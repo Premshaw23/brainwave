@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '../../context/AuthContext';
+import { showError } from '@/lib/toast';
 
 export default function FlashcardList() {
   const { user } = useAuth();
@@ -31,7 +32,7 @@ export default function FlashcardList() {
         setFlashcards(data.flashcards);
       }
     } catch (error) {
-      console.error('Failed to fetch flashcards:', error);
+      showError('Failed to fetch flashcards');
     } finally {
       setLoading(false);
     }
@@ -52,7 +53,7 @@ export default function FlashcardList() {
         setFlashcards(flashcards.filter(f => f._id !== id));
       }
     } catch (error) {
-      console.error('Delete failed:', error);
+      showError('Delete failed');
     }
   };
 

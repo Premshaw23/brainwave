@@ -3,6 +3,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import AppLoader from '@/components/ui/AppLoader';
+import { showError } from '@/lib/toast';
 import { Brain, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,16 +41,18 @@ export default function QuizzesPage() {
         setQuizzes(data.quizzes);
       } else {
         setError(data.error || 'Failed to fetch quizzes');
+        showError(data.error || 'Failed to fetch quizzes');
       }
     } catch (err: any) {
       setError(err.message || 'Failed to fetch quizzes');
+      showError(err.message || 'Failed to fetch quizzes');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return <div>Loading quizzes...</div>;
+    return <AppLoader message="Loading quizzes…" />;
   }
 
   return (

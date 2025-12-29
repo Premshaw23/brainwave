@@ -2,8 +2,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { showError } from '@/lib/toast';
 import { useAuth } from './../../../context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import AppLoader from '@/components/ui/AppLoader';
 import ProgressChart from '@/components/analytics/ProgressChart';
 import MasteryChart from '@/components/analytics/MasteryChart';
 import StreakCard from '@/components/analytics/StreakCard';
@@ -50,17 +51,14 @@ export default function AnalyticsPage() {
       });
     } catch (error) {
       console.error('Failed to fetch analytics:', error);
+      showError('Failed to fetch analytics. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-      </div>
-    );
+    return <AppLoader message="Loading analytics…" />;
   }
 
   if (!analyticsData) {

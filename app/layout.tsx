@@ -60,6 +60,7 @@ export const viewport = {
 
 
 import { AuthProvider } from "../context/AuthContext";
+import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
   children,
@@ -69,9 +70,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased scroll-smooth`}
       >
         <AuthProvider>
+          <Toaster position="top-right" />
           {children}
         </AuthProvider>
       </body>
