@@ -321,6 +321,10 @@ io.on("connection", (socket) => {
         console.log(`📡 Broadcasting message to group:${groupId}`);
         io.to(`group:${groupId}`).emit("new_message", messageData);
 
+        // Emit message_delivered to sender (and optionally to all group members)
+        // This tells the client to update deliveryStatus to 'delivered'
+        io.to(socket.id).emit("message_delivered", { messageId: messageData._id });
+
         // Stop typing indicator
         if (groupTyping.has(groupId)) {
           groupTyping.get(groupId).delete(socket.userId);
