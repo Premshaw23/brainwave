@@ -56,8 +56,14 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
-      // User is now authenticated via Firebase, context will update automatically
+      const userCredential = await signInWithPopup(auth, provider);
+      const firebaseToken = await userCredential.user.getIdToken();
+      // Always call backend login to ensure MongoDB user exists
+      await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firebaseToken }),
+      });
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login with Google');
