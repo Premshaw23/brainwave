@@ -37,7 +37,6 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  // typingUsers: Map<userId, displayName>
   const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map());
   const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -47,11 +46,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   const messageSetRef = useRef<Set<string>>(new Set());
   const lastMessageIdRef = useRef<string | null>(null);
   const shouldAutoScrollRef = useRef(true);
+  const hasScrolledToBottomRef = useRef(false);
   
-  // Always stop typing on blur
-  const handleInputBlur = () => {
-    stopTyping();
-  }
   // Invite modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
@@ -94,14 +90,14 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     return scrollHeight - scrollTop - clientHeight < threshold;
   }, []);
 
-  // Smart scroll
+  // Smart scroll - only scroll if needed
   const scrollToBottom = useCallback((force = false) => {
     if (force || shouldAutoScrollRef.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, []);
 
-  // Track scroll position
+  // Track scroll position for auto-scroll-to-bottom only
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -119,11 +115,14 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     fetchMessages();
   }, [groupId]);
 
-  // Initial scroll
+  // Initial scroll to bottom ONCE after messages load
   useEffect(() => {
-    if (!loading && messages.length > 0 && lastMessageIdRef.current === null) {
-      setTimeout(() => scrollToBottom(true), 100);
-      lastMessageIdRef.current = messages[messages.length - 1]?._id || null;
+    if (!loading && messages.length > 0 && !hasScrolledToBottomRef.current) {
+      setTimeout(() => {
+        scrollToBottom(true);
+        hasScrolledToBottomRef.current = true;
+        lastMessageIdRef.current = messages[messages.length - 1]?._id || null;
+      }, 100);
     }
   }, [loading, messages, scrollToBottom]);
   
@@ -175,6 +174,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
         }
         
         const isOwnMessage = message.sender._id === currentUserId;
+        
+        // Only auto-scroll if it's user's own message OR user is near bottom
         if (isOwnMessage || shouldAutoScrollRef.current) {
           setTimeout(() => scrollToBottom(isOwnMessage), 50);
         }
@@ -199,6 +200,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
           m._id === messageId ? { ...m, deliveryStatus: 'delivered' as const } : m
         )
       );
+      // No scroll on delivery status update
     };
     socket.on('message_delivered', handleMessageDelivered);
 
@@ -213,7 +215,6 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     };
     socket.on('message_read', handleMessageRead);
 
-
     const handleUserTyping = ({ userId, displayName }: any) => {
       if (userId !== currentUserId) {
         setTypingUsers((prev) => {
@@ -221,6 +222,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
           updated.set(userId, displayName);
           return updated;
         });
+        // Only scroll if user is near bottom
         if (shouldAutoScrollRef.current) {
           setTimeout(() => scrollToBottom(false), 100);
         }
@@ -290,9 +292,15 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
       const data = await response.json();
       if (data.success) {
-        setMessages(data.messages);
-        messageSetRef.current = new Set(data.messages.map((m: Message) => m._id));
-        lastMessageIdRef.current = null;
+        // Set deliveryStatus for own messages so ticks always show
+        const updatedMessages = data.messages.map((m: Message) => {
+          if (m.sender && m.sender._id === currentUserId) {
+            return { ...m, deliveryStatus: 'delivered' };
+          }
+          return m;
+        });
+        setMessages(updatedMessages);
+        messageSetRef.current = new Set(updatedMessages.map((m: Message) => m._id));
       } else {
         showError(data.error || 'Failed to fetch messages');
       }
@@ -321,7 +329,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
         socket.emit('typing_stop', { groupId });
         isTypingEmittedRef.current = false;
       }
-      typingTimeoutRef.current = null; // 1200ms debounce for better responsiveness
+      typingTimeoutRef.current = null;
     }, 1200);
   };
 
@@ -361,7 +369,10 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       createdAt: new Date().toISOString(),
       deliveryStatus: 'pending',
     };
+    
     setMessages(prev => [...prev, pendingMsg]);
+    // Force scroll to show user's message
+    setTimeout(() => scrollToBottom(true), 50);
 
     let sendTimeout = setTimeout(() => {
       setSending(false);
@@ -387,7 +398,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
           return;
         }
         
-        // Replace pending message with sent message
+        // Replace pending message with sent message (single tick)
         setMessages(prev => 
           prev.map(m => 
             m._id === tempId 
@@ -396,39 +407,32 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
           )
         );
         setSending(false);
-        setTimeout(() => scrollToBottom(true), 100);
       }
     );
   };
 
   // Render delivery status icon
   const renderDeliveryStatus = (status?: Message['deliveryStatus']) => {
-    if (!status || status === 'pending') {
-      return <Loader2 className="w-3 h-3 animate-spin" />;
-    }
-    
     if (status === 'sent') {
-      return <Check className="w-3 h-3" />;
+      return <Check className="w-3 h-3 text-white/70" />;
     }
-    
     if (status === 'delivered') {
       return (
-        <span className="flex items-center">
+        <span className="flex items-center text-white/70">
           <Check className="w-3 h-3" />
           <Check className="w-3 h-3 -ml-2" />
         </span>
       );
     }
-    
     if (status === 'read') {
       return (
-        <span className="flex items-center">
-          <Check className="w-3 h-3 text-blue-400" />
-          <Check className="w-3 h-3 -ml-2 text-blue-400" />
+        <span className="flex items-center text-blue-300">
+          <Check className="w-3 h-3" />
+          <Check className="w-3 h-3 -ml-2" />
         </span>
       );
     }
-    
+    // For pending/undefined, show nothing
     return null;
   };
 
@@ -565,19 +569,21 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                         {isShortMessage ? (
                           <div className="flex items-end gap-2">
                             <span className="text-sm wrap-break-word">{message.content}</span>
-                            <span 
-                              className={`text-[10px] shrink-0 self-end ${
-                                isOwn ? 'text-white/70' : 'text-gray-500'
-                              }`}
-                              style={{ lineHeight: '1.4' }}
-                            >
-                              {formatTime(message.createdAt)}
-                            </span>
-                            {isOwn && (
-                              <span className="shrink-0 self-end" style={{ marginBottom: '1px' }}>
-                                {renderDeliveryStatus(message.deliveryStatus)}
+                            <div className="flex items-center gap-1 shrink-0 self-end">
+                              <span 
+                                className={`text-[10px] ${
+                                  isOwn ? 'text-white/70' : 'text-gray-500'
+                                }`}
+                                style={{ lineHeight: '1.4' }}
+                              >
+                                {formatTime(message.createdAt)}
                               </span>
-                            )}
+                              {isOwn && (
+                                <span style={{ marginBottom: '1px' }}>
+                                  {renderDeliveryStatus(message.deliveryStatus)}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         ) : (
                           <div>
@@ -585,7 +591,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                               {message.content}
                             </div>
                             <div 
-                              className={`absolute bottom-2 right-4 flex items-center gap-1 ${
+                              className={`absolute bottom-2 right-4 flex items-center gap-1.5 ${
                                 isOwn ? 'text-white/70' : 'text-gray-500'
                               }`}
                             >
@@ -635,6 +641,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
               handleTyping();
             }}
             onKeyDown={handleKeyPress}
+            onBlur={stopTyping}
             disabled={!isConnected || sending || !hasJoinedGroup}
             rows={1}
             style={{
