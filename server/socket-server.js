@@ -1,6 +1,5 @@
 // server/socket-server.js
-require('dotenv').config({ path: '.env.local' });
-// FIXED VERSION - Works with TypeScript models
+require("dotenv").config({ path: ".env.local" });
 const express = require("express");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
@@ -13,13 +12,12 @@ const httpServer = createServer(app);
 // Socket.io setup with CORS
 const io = new Server(httpServer, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "https://brainwave-two-iota.vercel.app", // Your Vercel URL (no trailing slash)
-    ],
+    origin: ["http://localhost:3000", "https://brainwave-two-iota.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true,
   },
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 // Make io globally available for notification emission
@@ -114,7 +112,6 @@ const StudyGroup =
 const activeUsers = new Map(); // userId -> { socketId, groups: Set }
 const groupTyping = new Map(); // groupId -> Set of userId
 
-
 // Enhanced authentication: support Firebase UID or MongoDB ObjectId
 io.use(async (socket, next) => {
   try {
@@ -165,13 +162,16 @@ io.on("connection", (socket) => {
   // ==========================================
   // JOIN GROUP
   // ==========================================
-  socket.on("join_group", async ({ groupId }) => {
+  socket.on("join_group", async ({ groupId }, callback) => {
     try {
       // Verify user is member of group
       const group = await StudyGroup.findById(groupId);
 
       if (!group) {
-        return socket.emit("error", { message: "Group not found" });
+        const error = { message: "Group not found" };
+        socket.emit("error", error);
+        if (callback) callback({ success: false, error: error.message });
+        return;
       }
 
       const isMember = group.members.some(
@@ -179,9 +179,10 @@ io.on("connection", (socket) => {
       );
 
       if (!isMember) {
-        return socket.emit("error", {
-          message: "Not authorized to join this group",
-        });
+        const error = { message: "Not authorized to join this group" };
+        socket.emit("error", error);
+        if (callback) callback({ success: false, error: error.message });
+        return;
       }
 
       // Join the socket room
@@ -222,10 +223,13 @@ io.on("connection", (socket) => {
         onlineMembers,
       });
 
+      if (callback) callback({ success: true, groupId, onlineMembers });
+
       console.log(`📥 User ${socket.userId} joined group ${groupId}`);
     } catch (error) {
       console.error("Join group error:", error);
       socket.emit("error", { message: "Failed to join group" });
+      if (callback) callback({ success: false, error: error.message });
     }
   });
 
@@ -240,6 +244,14 @@ io.on("connection", (socket) => {
       userInfo.groups.delete(groupId);
     }
 
+    // Clean up typing indicator
+    if (groupTyping.has(groupId)) {
+      groupTyping.get(groupId).delete(socket.userId);
+      if (groupTyping.get(groupId).size === 0) {
+        groupTyping.delete(groupId);
+      }
+    }
+
     io.to(`group:${groupId}`).emit("user_left", {
       userId: socket.userId,
       displayName: socket.user.displayName,
@@ -249,20 +261,35 @@ io.on("connection", (socket) => {
   });
 
   // ==========================================
-  // SEND MESSAGE
+  // SEND MESSAGE (FIXED: Callback BEFORE broadcast)
   // ==========================================
   socket.on(
     "send_message",
-    async ({ groupId, content, type = "text", metadata = null }) => {
+    async ({ groupId, content, type = "text", metadata = null }, callback) => {
       try {
+        console.log(`📬 Received send_message from ${socket.userId}:`, content);
+
+        // Validate input
+        if (!content || !content.trim()) {
+          console.log("❌ Empty message content");
+          if (callback) {
+            console.log("[DEBUG] Calling callback for empty content");
+            callback({ success: false, error: "Message content is required" });
+            console.log("[DEBUG] Callback for empty content sent");
+          }
+          return;
+        }
+
         // Create message in database
         const message = await Message.create({
           groupId,
           senderId: socket.userId,
-          content,
+          content: content.trim(),
           type,
           metadata,
         });
+
+        console.log(`💾 Message saved to DB:`, message._id);
 
         // Populate sender info
         await message.populate("senderId", "displayName avatar");
@@ -281,7 +308,17 @@ io.on("connection", (socket) => {
           createdAt: message.createdAt,
         };
 
-        // Broadcast to all group members
+        // CRITICAL FIX: Acknowledge FIRST before broadcasting
+        if (callback) {
+          console.log(`[DEBUG] About to call callback for message:`, message._id);
+          callback({ success: true, message: messageData });
+          console.log(`[DEBUG] Callback for message sent:`, message._id);
+        } else {
+          console.log(`[DEBUG] No callback function provided for message:`, message._id);
+        }
+
+        // THEN broadcast to all group members (including sender)
+        console.log(`📡 Broadcasting message to group:${groupId}`);
         io.to(`group:${groupId}`).emit("new_message", messageData);
 
         // Stop typing indicator
@@ -293,10 +330,16 @@ io.on("connection", (socket) => {
           });
         }
 
-        console.log(`💬 Message sent to group ${groupId}`);
+        console.log(`💬 Message sent to group ${groupId} by ${socket.userId}`);
       } catch (error) {
         console.error("Send message error:", error);
-        socket.emit("error", { message: "Failed to send message" });
+        const errorMsg = error.message || "Failed to send message";
+        socket.emit("error", { message: errorMsg });
+        if (callback) {
+          console.log("[DEBUG] Calling callback for error");
+          callback({ success: false, error: errorMsg });
+          console.log("[DEBUG] Callback for error sent");
+        }
       }
     }
   );
@@ -305,34 +348,42 @@ io.on("connection", (socket) => {
   // TYPING INDICATORS
   // ==========================================
   socket.on("typing_start", ({ groupId }) => {
-    if (!groupTyping.has(groupId)) {
-      groupTyping.set(groupId, new Set());
-    }
-    const typingSet = groupTyping.get(groupId);
-    if (!typingSet.has(socket.userId)) {
-      typingSet.add(socket.userId);
-      socket.to(`group:${groupId}`).emit("user_typing", {
-        userId: socket.userId,
-        displayName: socket.user.displayName,
-        groupId,
-      });
+    try {
+      if (!groupTyping.has(groupId)) {
+        groupTyping.set(groupId, new Set());
+      }
+      const typingSet = groupTyping.get(groupId);
+      if (!typingSet.has(socket.userId)) {
+        typingSet.add(socket.userId);
+        socket.to(`group:${groupId}`).emit("user_typing", {
+          userId: socket.userId,
+          displayName: socket.user.displayName,
+          groupId,
+        });
+      }
+    } catch (error) {
+      console.error("Typing start error:", error);
     }
   });
 
   socket.on("typing_stop", ({ groupId }) => {
-    if (groupTyping.has(groupId)) {
-      const typingSet = groupTyping.get(groupId);
-      if (typingSet.has(socket.userId)) {
-        typingSet.delete(socket.userId);
-        socket.to(`group:${groupId}`).emit("typing_stopped", {
-          userId: socket.userId,
-          groupId,
-        });
-        // Clean up empty sets
-        if (typingSet.size === 0) {
-          groupTyping.delete(groupId);
+    try {
+      if (groupTyping.has(groupId)) {
+        const typingSet = groupTyping.get(groupId);
+        if (typingSet.has(socket.userId)) {
+          typingSet.delete(socket.userId);
+          socket.to(`group:${groupId}`).emit("typing_stopped", {
+            userId: socket.userId,
+            groupId,
+          });
+          // Clean up empty sets
+          if (typingSet.size === 0) {
+            groupTyping.delete(groupId);
+          }
         }
       }
+    } catch (error) {
+      console.error("Typing stop error:", error);
     }
   });
 
@@ -377,7 +428,7 @@ io.on("connection", (socket) => {
     const userInfo = activeUsers.get(socket.userId);
 
     if (userInfo) {
-      // Notify all groups user was in
+      // Notify all groups user was in and clean up typing
       for (const groupId of userInfo.groups) {
         io.to(`group:${groupId}`).emit("user_left", {
           userId: socket.userId,
@@ -386,7 +437,16 @@ io.on("connection", (socket) => {
 
         // Clean up typing indicators
         if (groupTyping.has(groupId)) {
-          groupTyping.get(groupId).delete(socket.userId);
+          const typingSet = groupTyping.get(groupId);
+          typingSet.delete(socket.userId);
+          if (typingSet.size === 0) {
+            groupTyping.delete(groupId);
+          }
+          // Notify that user stopped typing
+          io.to(`group:${groupId}`).emit("typing_stopped", {
+            userId: socket.userId,
+            groupId,
+          });
         }
       }
 
@@ -403,7 +463,7 @@ io.on("connection", (socket) => {
   // ERROR HANDLING
   // ==========================================
   socket.on("error", (error) => {
-    console.error("Socket error:", error);
+    console.error(`Socket error for user ${socket.userId}:`, error);
   });
 });
 
@@ -413,36 +473,47 @@ app.get("/health", (req, res) => {
     status: "ok",
     activeConnections: io.engine.clientsCount,
     activeUsers: activeUsers.size,
+    activeGroups: groupTyping.size,
     timestamp: new Date().toISOString(),
   });
 });
 
 // Start server
-httpServer.listen(PORT, '0.0.0.0', () => {
-  console.log(`Socket.io server running on port ${PORT}`);
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Socket.io server running on port ${PORT}`);
+  console.log(`📊 Health check available at http://localhost:${PORT}/health`);
 });
 
 // Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received: closing HTTP server");
-  httpServer.close(() => {
-    console.log("HTTP server closed");
-    mongoose.connection.close(false, () => {
-      console.log("MongoDB connection closed");
-      process.exit(0);
-    });
-  });
-});
+const gracefulShutdown = (signal) => {
+  console.log(`${signal} signal received: closing HTTP server`);
 
-process.on("SIGINT", () => {
-  console.log("SIGINT signal received: closing HTTP server");
-  httpServer.close(() => {
-    console.log("HTTP server closed");
-    mongoose.connection.close(false, () => {
-      console.log("MongoDB connection closed");
-      process.exit(0);
+  // Notify all connected clients
+  io.emit("server_shutdown", { message: "Server is shutting down" });
+
+  // Close all socket connections
+  io.close(() => {
+    console.log("All socket connections closed");
+
+    httpServer.close(() => {
+      console.log("HTTP server closed");
+      mongoose.connection.close(false, () => {
+        console.log("MongoDB connection closed");
+        process.exit(0);
+      });
     });
   });
-});
+
+  // Force close after 10 seconds
+  setTimeout(() => {
+    console.error(
+      "Could not close connections in time, forcefully shutting down"
+    );
+    process.exit(1);
+  }, 10000);
+};
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 module.exports = { io, httpServer };

@@ -1,9 +1,9 @@
 // components/groups/GroupChat.tsx
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Send, Loader2, UserPlus, X, Check } from 'lucide-react';
+import { Send, Loader2, UserPlus, X, Check, WifiOff, Wifi } from 'lucide-react';
 import AppLoader from '@/components/ui/AppLoader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,8 +37,15 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
+  const [hasJoinedGroup, setHasJoinedGroup] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isTypingEmittedRef = useRef(false);
+  const messageSetRef = useRef<Set<string>>(new Set());
+  const lastMessageIdRef = useRef<string | null>(null);
+  const shouldAutoScrollRef = useRef(true);
+  const pendingMessageRef = useRef<string | null>(null);
 
   // Invite modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -74,48 +81,166 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     }
   };
 
+  // Check if user is near bottom of chat
+  const isNearBottom = useCallback(() => {
+    if (!messagesContainerRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+    const threshold = 150; // pixels from bottom
+    return scrollHeight - scrollTop - clientHeight < threshold;
+  }, []);
+
+  // Smart scroll - only scroll if user is near bottom or it's their own message
+  const scrollToBottom = useCallback((force = false) => {
+    if (force || shouldAutoScrollRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, []);
+
+  // Track scroll position to determine auto-scroll behavior
+  useEffect(() => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      shouldAutoScrollRef.current = isNearBottom();
+    };
+
+    container.addEventListener('scroll', handleScroll);
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [isNearBottom]);
+
+  // Fetch messages on mount
   useEffect(() => {
     fetchMessages();
   }, [groupId]);
 
-  // Auto-scroll to bottom whenever messages change
+  // Only auto-scroll on initial load
   useEffect(() => {
-    if (!loading) scrollToBottom();
-  }, [messages, loading]);
+    if (!loading && messages.length > 0 && lastMessageIdRef.current === null) {
+      // Initial load - always scroll to bottom
+      setTimeout(() => scrollToBottom(true), 100);
+      lastMessageIdRef.current = messages[messages.length - 1]?._id || null;
+    }
+  }, [loading, messages, scrollToBottom]);
 
+  // Join group handler with callback support
+  const joinGroup = useCallback(() => {
+    if (!socket || !groupId || !currentUserId) return;
+
+    setHasJoinedGroup(true);
+
+    socket.emit('join_group', { groupId }, (response: any) => {
+      if (response?.success) {
+        console.log('✅ Joined group successfully');
+      } else {
+        console.error('Failed to join group:', response?.error);
+        setHasJoinedGroup(false);
+        showError(response?.error || 'Failed to join group');
+      }
+    });
+  }, [socket, groupId, currentUserId]);
+
+  // Socket connection and event handlers
   useEffect(() => {
     if (!socket || !groupId || !currentUserId) return;
 
-    socket.emit('join_group', { groupId });
+    joinGroup();
 
+    const handleReconnect = () => {
+      console.log('🔄 Socket reconnected, rejoining group...');
+      joinGroup();
+      fetchMessages();
+    };
+
+    socket.on('connect', handleReconnect);
+
+    // Handle new messages with smart scrolling
     const handleNewMessage = (message: Message) => {
-      setMessages((prev) => [...prev, message]);
-      scrollToBottom();
+      console.log('📨 Received new message:', message._id);
+      
+      if (messageSetRef.current.has(message._id)) {
+        console.log('⚠️ Duplicate message ignored:', message._id);
+        return;
+      }
+      messageSetRef.current.add(message._id);
+      
+      // Clear pending message ref if this is the message we sent
+      if (pendingMessageRef.current === message._id) {
+        console.log('✅ Pending message confirmed:', message._id);
+        pendingMessageRef.current = null;
+      }
+      
+      setMessages((prev) => {
+        if (prev.some(m => m._id === message._id)) {
+          console.log('⚠️ Message already in state:', message._id);
+          return prev;
+        }
+        
+        // Only auto-scroll if it's the current user's message OR user is near bottom
+        const isOwnMessage = message.sender._id === currentUserId;
+        if (isOwnMessage || shouldAutoScrollRef.current) {
+          setTimeout(() => scrollToBottom(isOwnMessage), 50);
+        }
+        
+        lastMessageIdRef.current = message._id;
+        return [...prev, message];
+      });
     };
     socket.on('new_message', handleNewMessage);
 
     const handleUserTyping = ({ userId, displayName }: any) => {
       if (userId !== currentUserId) {
         setTypingUsers((prev) => new Set(prev).add(displayName));
+        // Auto-scroll if near bottom when someone starts typing
+        if (shouldAutoScrollRef.current) {
+          setTimeout(() => scrollToBottom(false), 100);
+        }
       }
     };
     socket.on('user_typing', handleUserTyping);
 
-    const handleTypingStopped = ({ userId }: any) => {
-      setTypingUsers((prev) => {
-        const updated = new Set(prev);
-        return updated;
-      });
+    const handleTypingStopped = ({ userId, displayName }: any) => {
+      if (userId !== currentUserId) {
+        setTypingUsers((prev) => {
+          const updated = new Set(prev);
+          updated.delete(displayName);
+          return updated;
+        });
+      }
     };
     socket.on('typing_stopped', handleTypingStopped);
 
+    const handleError = (error: any) => {
+      console.error('Socket error:', error);
+      showError(error.message || 'Connection error occurred');
+    };
+    socket.on('error', handleError);
+
+    const handleServerShutdown = () => {
+      showError('Server is restarting. Please wait...');
+    };
+    socket.on('server_shutdown', handleServerShutdown);
+
     return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = null;
+      }
+      
+      if (isTypingEmittedRef.current) {
+        socket.emit('typing_stop', { groupId });
+        isTypingEmittedRef.current = false;
+      }
+      
       socket.emit('leave_group', { groupId });
+      socket.off('connect', handleReconnect);
       socket.off('new_message', handleNewMessage);
       socket.off('user_typing', handleUserTyping);
       socket.off('typing_stopped', handleTypingStopped);
+      socket.off('error', handleError);
+      socket.off('server_shutdown', handleServerShutdown);
     };
-  }, [socket, groupId, currentUserId]);
+  }, [socket, groupId, currentUserId, joinGroup, scrollToBottom]);
 
   const fetchMessages = async () => {
     try {
@@ -128,7 +253,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       const data = await response.json();
       if (data.success) {
         setMessages(data.messages);
-        setTimeout(scrollToBottom, 100);
+        messageSetRef.current = new Set(data.messages.map((m: Message) => m._id));
+        lastMessageIdRef.current = null; // Reset for initial scroll
       } else {
         showError(data.error || 'Failed to fetch messages');
       }
@@ -140,38 +266,103 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
     }
   };
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const handleTyping = () => {
-    if (!socket) return;
+    if (!socket || !isConnected) return;
 
-    socket.emit('typing_start', { groupId });
+    if (!isTypingEmittedRef.current) {
+      socket.emit('typing_start', { groupId });
+      isTypingEmittedRef.current = true;
+    }
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit('typing_stop', { groupId });
+      if (isTypingEmittedRef.current && socket) {
+        socket.emit('typing_stop', { groupId });
+        isTypingEmittedRef.current = false;
+      }
+      typingTimeoutRef.current = null;
     }, 2000);
   };
 
+  const stopTyping = () => {
+    if (!socket) return;
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    
+    if (isTypingEmittedRef.current) {
+      socket.emit('typing_stop', { groupId });
+      isTypingEmittedRef.current = false;
+    }
+  };
+
   const handleSend = async () => {
-    if (!socket || !newMessage.trim()) return;
+    if (!socket || !newMessage.trim() || !isConnected) return;
 
     setSending(true);
-
-    socket.emit('send_message', {
-      groupId,
-      content: newMessage.trim(),
-      type: 'text',
-    });
-
+    const messageContent = newMessage.trim();
     setNewMessage('');
-    setSending(false);
-    setTimeout(scrollToBottom, 100); // Ensure scroll after sending
+    stopTyping();
+
+    console.log('📤 Sending message:', messageContent);
+
+    // Increase timeout to 20 seconds
+    let sendTimeout = setTimeout(() => {
+      console.error('⏱️ Message send timeout');
+      setSending(false);
+      showError('Message send failed. Retrying...');
+      setNewMessage(messageContent); // Restore message
+      pendingMessageRef.current = null;
+    }, 20000);
+
+    // Ensure callback is the last argument, not inside the data object
+    socket.emit(
+      'send_message',
+      {
+        groupId,
+        content: messageContent,
+        type: 'text',
+      },
+      function(response: { success: boolean; error?: string; message?: Message }) {
+        clearTimeout(sendTimeout);
+        console.log('📬 Send callback received:', response);
+        if (!response) {
+          console.error('❌ No response from server');
+          setSending(false);
+          setNewMessage(messageContent);
+          showError('No response from server. Please try again.');
+          return;
+        }
+        if (!response.success) {
+          console.error('❌ Send failed:', response.error);
+          setSending(false);
+          setNewMessage(messageContent);
+          showError(response.error || 'Failed to send message');
+          pendingMessageRef.current = null;
+        } else {
+          console.log('✅ Message sent successfully:', response.message?._id);
+          if (response.message?._id) {
+            pendingMessageRef.current = response.message._id;
+            if (!messageSetRef.current.has(response.message._id)) {
+              messageSetRef.current.add(response.message._id);
+              setMessages(prev => {
+                if (prev.some(m => m._id === response.message!._id)) {
+                  return prev;
+                }
+                return [...prev, response.message!];
+              });
+            }
+          }
+          setSending(false);
+          setTimeout(() => scrollToBottom(true), 100);
+        }
+      }
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -222,9 +413,16 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
   return (
     <div className="flex flex-col h-full bg-linear-to-b from-white via-indigo-50 to-indigo-100">
-      {/* Minimal Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-indigo-100 bg-transparent">
-        <h2 className="font-semibold text-base text-indigo-700">Group Chat</h2>
+      {/* Header with connection status */}
+      <div className="flex items-center justify-between px-4 py-2 border-b border-indigo-100 bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-base text-indigo-700">Group Chat</h2>
+          {isConnected ? (
+            <Wifi className="w-4 h-4 text-green-500" />
+          ) : (
+            <WifiOff className="w-4 h-4 text-red-500 animate-pulse"  />
+          )}
+        </div>
         <Button
           onClick={() => setShowInviteModal(true)}
           variant="ghost"
@@ -235,8 +433,21 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
         </Button>
       </div>
 
-      {/* Messages Area - visually focused */}
-      <div className="flex-1 overflow-y-auto px-0 py-4 flex flex-col items-center">
+      {/* Connection status banner */}
+      {!isConnected && (
+        <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2 text-center">
+          <p className="text-sm text-yellow-800 flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Reconnecting to chat...
+          </p>
+        </div>
+      )}
+
+      {/* Messages Area - with ref for scroll detection */}
+      <div 
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-0 py-4 flex flex-col items-center"
+      >
         <div className="w-full max-w-2xl px-2">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
@@ -339,39 +550,66 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                 <div className="flex gap-2 items-center mt-2">
                   <div className="w-8" />
                   <div className="bg-white rounded-2xl rounded-bl-md px-3 py-2 shadow-sm border border-indigo-100">
-                    <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <span className="text-xs text-gray-600 ml-1">
+                        {Array.from(typingUsers).join(', ')} {typingUsers.size === 1 ? 'is' : 'are'} typing
+                      </span>
                     </div>
                   </div>
                 </div>
               )}
-              <div ref={messagesEndRef} />
+              {/* Extra padding to prevent input from blocking messages */}
+              <div ref={messagesEndRef} className="h-4" />
             </div>
           )}
         </div>
       </div>
 
-      {/* Minimal Input Area */}
-      <div className="border-t border-indigo-100 bg-white/80 px-4 py-2">
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Type a message..."
+      {/* Input Area */}
+      <div className="border-t border-indigo-100 bg-white/80 backdrop-blur-sm px-4 py-3">
+        <div className="flex items-end gap-2">
+          <textarea
+            placeholder={isConnected ? "Type a message..." : "Connecting..."}
             value={newMessage}
-            onChange={(e) => {
+            onChange={e => {
               setNewMessage(e.target.value);
               handleTyping();
             }}
-            onKeyPress={handleKeyPress}
-            disabled={!isConnected || sending}
-            className="flex-1 bg-white/0 border-none focus:ring-0 text-base"
+            onKeyDown={handleKeyPress}
+            disabled={!isConnected || sending || !hasJoinedGroup}
+            rows={1}
+            style={{
+              resize: 'none',
+              minHeight: '40px',
+              maxHeight: '120px',
+              overflowY: 'auto',
+              width: '100%',
+              fontSize: '1rem',
+              background: 'white',
+              border: '1px solid #e0e7ff',
+              borderRadius: '0.75rem',
+              padding: '0.75rem',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              transition: 'border 0.2s',
+            }}
+            className="flex-1 focus:ring-2 focus:ring-indigo-500"
+            autoFocus={false}
+            onInput={e => {
+              const target = e.target as HTMLTextAreaElement;
+              target.style.height = '40px';
+              target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
+            }}
           />
           <Button
             onClick={handleSend}
-            disabled={!isConnected || !newMessage.trim() || sending}
+            disabled={!isConnected || !newMessage.trim() || sending || !hasJoinedGroup}
             size="icon"
-            className="bg-indigo-600 hover:bg-indigo-700 shadow-md"
+            className="bg-indigo-600 hover:bg-indigo-700 shadow-md disabled:opacity-50"
           >
             {sending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -380,6 +618,11 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
             )}
           </Button>
         </div>
+        {!isConnected && (
+          <p className="text-xs text-gray-500 mt-1 text-center">
+            Waiting for connection...
+          </p>
+        )}
       </div>
 
       {/* Invite Modal */}
