@@ -29,7 +29,19 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
+      // Firebase login
       await login(email, password);
+      // Get Firebase token
+      const user = auth.currentUser;
+      if (user) {
+        const firebaseToken = await user.getIdToken();
+        // Call backend login to ensure MongoDB user exists
+        await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firebaseToken }),
+        });
+      }
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login');

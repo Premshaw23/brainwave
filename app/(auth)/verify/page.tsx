@@ -66,7 +66,7 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-xl shadow-lg text-center space-y-7 border border-indigo-100">
+    <div className="max-w-md mx-auto p-8 bg-white rounded-xl shadow-lg text-center space-y-7 border border-indigo-100">
       <div className="flex flex-col items-center gap-2">
         <MailCheck className="w-12 h-12 text-indigo-600 mb-2" />
         <h1 className="text-2xl font-bold text-gray-900">Verify Your Email</h1>

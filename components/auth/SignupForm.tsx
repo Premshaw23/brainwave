@@ -75,21 +75,14 @@ export default function SignupForm() {
       const userCredential = await signInWithPopup(auth, provider);
       const firebaseToken = await userCredential.user.getIdToken();
 
-      const response = await fetch('/api/auth/login', {
+      // Always call backend login to ensure MongoDB user exists
+      await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ firebaseToken }),
       });
 
-      const data = await response.json();
-
-      if (data.success) {
-        // User is now authenticated via Firebase, context will update automatically
-        router.push('/dashboard');
-      } else {
-        setError(data.error || 'Signup failed');
-        showError(data.error || 'Signup failed');
-      }
+      router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to signup with Google');
       showError(err.message || 'Failed to signup with Google');
