@@ -42,13 +42,20 @@ export default function NoteUpload() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      if (selectedFile.type === 'application/pdf' || selectedFile.type === 'text/plain') {
-        setFile(selectedFile);
-        setError('');
-      } else {
+      const isValidType = selectedFile.type === 'application/pdf' || selectedFile.type === 'text/plain';
+      const isValidSize = selectedFile.size <= 10 * 1024 * 1024; // 10MB
+      if (!isValidType) {
         setError('Please upload a PDF or text file');
         setFile(null);
+        return;
       }
+      if (!isValidSize) {
+        setError('File size must be less than 10MB');
+        setFile(null);
+        return;
+      }
+      setFile(selectedFile);
+      setError('');
     }
   };
 
@@ -67,8 +74,49 @@ export default function NoteUpload() {
       setLoading(false);
       return;
     }
-    // ...existing code for upload logic (API call, etc.)
-    setLoading(false);
+    if (uploadMethod === 'text' && !textContent.trim()) {
+      setError('Please enter some content');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('subject', subject);
+      if (uploadMethod === 'file' && file) {
+        formData.append('file', file);
+      } else if (uploadMethod === 'text') {
+        formData.append('content', textContent);
+      }
+
+      if (!user) throw new Error('Not authenticated');
+      const token = await user.getIdToken();
+      const response = await fetch('/api/notes/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      if (data.success) {
+        setTitle('');
+        setSubject('');
+        setTextContent('');
+        setFile(null);
+        setError('');
+        router.push(`/notes/${data.noteId}`);
+      } else {
+        setError(data.error || 'Upload failed');
+        showError(data.error || 'Upload failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload note');
+      showError(err.message || 'Failed to upload note');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -143,8 +191,8 @@ export default function NoteUpload() {
                 id="file"
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                required
+                onChange={handleFileChange}
+                required={uploadMethod === 'file'}
                 className="rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
               />
             </div>

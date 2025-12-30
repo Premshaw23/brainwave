@@ -105,7 +105,7 @@ export default function PostCard({ post, onLike, onComment }: PostCardProps) {
     if (difficulty === 'medium') return 'bg-yellow-100 text-yellow-800';
     return 'bg-red-100 text-red-800';
   };
-  console.log(`/profile/${post.author.firebaseUid}`);
+  // console.log(`/profile/${post.author.firebaseUid}`);
   return (
     <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200 hover:shadow-indigo-200/50 transition-all duration-200">
       <CardContent className="p-2 px-8">

@@ -41,43 +41,42 @@ export default function FlashcardStudy({
   };
 
   const handleMastered = async (mastered: boolean) => {
-    try {
-      if (!user) throw new Error('Not authenticated');
-      const token = await user.getIdToken();
-      await fetch(`/api/flashcards/${flashcardId}/review`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          cardIndex: currentIndex,
-          mastered,
-        }),
-      });
-
-      // Update local state
-      const updatedCards = [...cards];
-      updatedCards[currentIndex].mastered = mastered;
-      setCards(updatedCards);
-
-      // Update stats
-      setSessionStats(prev => ({
-        studied: prev.studied + 1,
-        mastered: mastered ? prev.mastered + 1 : prev.mastered,
-        needsReview: !mastered ? prev.needsReview + 1 : prev.needsReview,
-      }));
-
-      // Move to next card
-      if (currentIndex < cards.length - 1) {
-        setCurrentIndex(currentIndex + 1);
-        setIsFlipped(false);
-      } else {
-        onComplete?.();
-      }
-    } catch (error) {
-      showError('Failed to update review');
+    // Optimistically update local state and UI
+    const updatedCards = [...cards];
+    updatedCards[currentIndex].mastered = mastered;
+    setCards(updatedCards);
+    setSessionStats(prev => ({
+      studied: prev.studied + 1,
+      mastered: mastered ? prev.mastered + 1 : prev.mastered,
+      needsReview: !mastered ? prev.needsReview + 1 : prev.needsReview,
+    }));
+    if (currentIndex < cards.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setIsFlipped(false);
+    } else {
+      onComplete?.();
     }
+
+    // Fire API request in background
+    (async () => {
+      try {
+        if (!user) throw new Error('Not authenticated');
+        const token = await user.getIdToken();
+        await fetch(`/api/flashcards/${flashcardId}/review`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            cardIndex: currentIndex,
+            mastered,
+          }),
+        });
+      } catch (error) {
+        showError('Failed to update review');
+      }
+    })();
   };
 
   const handlePrevious = () => {
