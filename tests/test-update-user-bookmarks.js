@@ -3,9 +3,9 @@
 
 const mongoose = require('mongoose');
 
-const MONGO_URI = 'mongodb+srv://shawprem217:premshaw23@premshaw23.z5uwo.mongodb.net/brainwave?retryWrites=true&w=majority'; 
-const userId = "6950077aaeb5a9ffd5f81690"; // <-- Change this to your user _id
-const postId = '69501ae4aeb5a9ffd5f8185f'; // <-- Change this to a valid Post _id
+const MONGO_URI = process.env.MONGODB_URI ;
+const userId = "6950077638b5a9ffd5f81690"; // <-- Change this to your user _id
+const postId = '69501ae87634a9ffd5f8185f'; // <-- Change this to a valid Post _id
 
 const userSchema = new mongoose.Schema({
   firebaseUid: String,
