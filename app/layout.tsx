@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "BrainWave - AI Learning Platform",
     description: "Collaborative AI-powered learning platform for notes, quizzes, flashcards, analytics, and community.",
     images: [
-      "/dashboard-screenshot.png"
+      "/logo.png"
     ],
     creator: "@PremShaw"
   }
