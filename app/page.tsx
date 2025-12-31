@@ -228,10 +228,12 @@ export default function Home() {
                 Study smarter, not harder, with proven AI technology.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 w-full">
+                <Link href={"/dashboard"}>
                 <button className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
                   Start Learning Free
                   <ArrowRight className="w-5 h-5" />
                 </button>
+                </Link>
                 <button className="w-full sm:w-auto bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all border-2 border-gray-200">
                   Watch Demo
                 </button>
@@ -406,10 +408,12 @@ export default function Home() {
           <p className="text-xl text-indigo-100 mb-10">
             Join 50,000+ students who are already learning smarter with BrainWave
           </p>
+          <Link href={"/dashboard"}>
           <button className="bg-white text-indigo-600 px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl transition-all transform hover:scale-105 inline-flex items-center gap-3">
             Start Free Trial
             <ArrowRight className="w-5 h-5" />
           </button>
+          </Link>
           <p className="text-indigo-100 mt-6 text-sm">No credit card required • 14-day free trial • Cancel anytime</p>
         </div>
       </section>
