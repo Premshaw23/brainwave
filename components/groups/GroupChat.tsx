@@ -470,9 +470,9 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-linear-to-b from-white via-indigo-50 to-indigo-100">
+    <div className="flex flex-col h-full bg-linear-to-br from-white via-indigo-50 to-indigo-100">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-indigo-100 bg-white/80 backdrop-blur-sm">
+      <div className="flex items-center justify-between px-3 sm:px-6 py-2 border-b border-indigo-100 bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <h2 className="font-semibold text-base text-indigo-700">Group Chat</h2>
           {isConnected ? (
@@ -493,7 +493,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
       {/* Connection banner */}
       {!isConnected && (
-        <div className="bg-yellow-100 border-b border-yellow-200 px-4 py-2 text-center">
+        <div className="bg-yellow-100 border-b border-yellow-200 px-3 sm:px-6 py-2 text-center">
           <p className="text-sm text-yellow-800 flex items-center justify-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             Reconnecting to chat...
@@ -504,9 +504,9 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       {/* Messages */}
       <div 
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-0 py-4 flex flex-col items-center"
+        className="flex-1 overflow-y-auto px-0 py-3 sm:py-6 flex flex-col items-center"
       >
-        <div className="w-full max-w-2xl px-2">
+        <div className="w-full max-w-2xl px-1 sm:px-4">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
@@ -515,7 +515,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {messages.map((message, index) => {
                 const isOwn = message.sender._id === currentUserId;
                 const showAvatar =
@@ -539,11 +539,11 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                         </div>
                       </div>
                     )}
-                    <div className={`flex gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`flex gap-1 sm:gap-2 ${isOwn ? 'justify-end' : 'justify-start'}`}>
                       {!isOwn && (
                         <div className="shrink-0 self-end">
                           {showAvatar ? (
-                            <Avatar className="w-8 h-8">
+                            <Avatar className="w-7 h-7 sm:w-8 sm:h-8">
                               <AvatarImage src={message.sender.avatar} />
                               <AvatarFallback className="bg-indigo-200 text-indigo-700 text-xs">
                                 {message.sender.displayName.charAt(0).toUpperCase()}
@@ -555,7 +555,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                         </div>
                       )}
                       <div
-                        className={`relative rounded-2xl px-4 py-2 max-w-[80%] shadow-sm ${
+                        className={`relative rounded-2xl px-3 sm:px-4 py-2 max-w-[90vw] sm:max-w-[80%] shadow-sm ${
                           isOwn
                             ? 'bg-indigo-600 text-white rounded-br-md'
                             : 'bg-white text-gray-900 rounded-bl-md border border-indigo-100'
@@ -567,14 +567,13 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                           </p>
                         )}
                         {isShortMessage ? (
-                          <div className="flex items-end gap-2">
+                          <div className="flex items-end gap-1 sm:gap-2">
                             <span className="text-sm wrap-break-word">{message.content}</span>
                             <div className="flex items-center gap-1 shrink-0 self-end">
                               <span 
-                                className={`text-[10px] ${
+                                className={`text-[10px] leading-4 ${
                                   isOwn ? 'text-white/70' : 'text-gray-500'
                                 }`}
-                                style={{ lineHeight: '1.4' }}
                               >
                                 {formatTime(message.createdAt)}
                               </span>
@@ -631,8 +630,8 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
       </div>
 
       {/* Input */}
-      <div className="border-t border-indigo-100 bg-white/80 backdrop-blur-sm px-4 py-3">
-        <div className="flex items-end gap-2">
+      <div className="border-t border-indigo-100 bg-white/80 backdrop-blur-sm px-3 sm:px-6 py-2 sm:py-3">
+        <div className="flex items-end gap-1 sm:gap-2">
           <textarea
             placeholder={isConnected ? "Type a message..." : "Connecting..."}
             value={newMessage}
@@ -644,22 +643,9 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
             onBlur={stopTyping}
             disabled={!isConnected || sending || !hasJoinedGroup}
             rows={1}
-            style={{
-              resize: 'none',
-              minHeight: '40px',
-              maxHeight: '120px',
-              overflowY: 'auto',
-              width: '100%',
-              fontSize: '1rem',
-              background: 'white',
-              border: '1px solid #e0e7ff',
-              borderRadius: '0.75rem',
-              padding: '0.75rem',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-              transition: 'border 0.2s',
-            }}
-            className="flex-1 focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 min-h-10 max-h-30 w-full text-base bg-white border border-indigo-100 rounded-xl px-3 py-2 shadow-sm focus:ring-2 focus:ring-indigo-500 resize-none transition-colors duration-200"
             autoFocus={false}
+            style={{overflowY:'auto'}}
             onInput={e => {
               const target = e.target as HTMLTextAreaElement;
               target.style.height = '40px';
@@ -688,9 +674,9 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowInviteModal(false)}>
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-4 border-b">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4" onClick={() => setShowInviteModal(false)}>
+          <div className="bg-white rounded-lg shadow-xl max-w-xs sm:max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-3 sm:p-4 border-b">
               <h3 className="text-lg font-semibold text-gray-900">Invite Member</h3>
               <Button
                 onClick={() => {
@@ -704,8 +690,7 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                 <X className="w-5 h-5" />
               </Button>
             </div>
-            
-            <div className="p-4 space-y-4">
+            <div className="p-3 sm:p-4 space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Email Address
@@ -725,7 +710,6 @@ export default function GroupChat({ groupId, currentUserId }: GroupChatProps) {
                   autoFocus
                 />
               </div>
-              
               <div className="flex gap-2 justify-end">
                 <Button
                   onClick={() => {

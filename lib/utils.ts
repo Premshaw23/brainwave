@@ -57,7 +57,14 @@ export function getSubjectColor(subject: string): string {
 
 // Calculates the current streak (including today if active, or up to yesterday if not)
 export function calculateStreak(attempts: any[]): number {
-  if (attempts.length === 0) return 0;
+    // INFO FOR USERS:
+    // Your current streak resets to 0 if you miss a day.
+    // Only consecutive days up to today or yesterday count for the current streak.
+    // Your longest streak is your all-time best sequence of consecutive days.
+  if (attempts.length === 0) {
+    console.debug('[calculateStreak] No attempts');
+    return 0;
+  }
 
   // Get unique days with activity (UTC)
   const daysSet = new Set(
@@ -67,7 +74,10 @@ export function calculateStreak(attempts: any[]): number {
       return d.getTime();
     })
   );
-  if (daysSet.size === 0) return 0;
+  if (daysSet.size === 0) {
+    console.debug('[calculateStreak] No unique days');
+    return 0;
+  }
 
   // Sort days descending
   const days = Array.from(daysSet).sort((a, b) => b - a);
@@ -76,16 +86,26 @@ export function calculateStreak(attempts: any[]): number {
   const yesterday = new Date(today);
   yesterday.setUTCDate(today.getUTCDate() - 1);
 
+  console.debug('[calculateStreak] Days:', days.map(ts => new Date(ts).toISOString()));
+  console.debug('[calculateStreak] Today:', today.toISOString(), 'Yesterday:', yesterday.toISOString());
+
   // If user was active today or yesterday, start streak
   let streak = 0;
   let expected = days[0] === today.getTime() ? today.getTime() : (days[0] === yesterday.getTime() ? yesterday.getTime() : null);
-  if (expected === null) return 0;
+  if (expected === null) {
+    console.debug('[calculateStreak] No activity today or yesterday. Streak = 0');
+    return 0;
+  }
 
   for (let i = 0; i < days.length; i++) {
-    if (days[i] !== expected) break;
+    if (days[i] !== expected) {
+      console.debug(`[calculateStreak] Break at i=${i}, days[i]=${new Date(days[i]).toISOString()}, expected=${new Date(expected).toISOString()}`);
+      break;
+    }
     streak++;
     expected -= 24 * 60 * 60 * 1000; // go to previous day
   }
+  console.debug('[calculateStreak] Final streak:', streak);
   return streak;
 }
 

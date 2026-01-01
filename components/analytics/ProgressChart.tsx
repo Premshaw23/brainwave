@@ -48,7 +48,7 @@ export default function ProgressChart({ data }: ProgressChartProps) {
   };
 
   return (
-    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
+    <Card className="bg-linear-to-brrom-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
       <CardHeader>
         <CardTitle className="text-indigo-700 font-extrabold text-2xl">Performance Over Time</CardTitle>
         <CardDescription className="text-indigo-400 font-semibold">Track your learning progress day by day</CardDescription>
@@ -58,7 +58,7 @@ export default function ProgressChart({ data }: ProgressChartProps) {
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="pt-2">
+        <div className="pt-2 w-full overflow-x-auto">
           <ResponsiveContainer width="100%" height={320}>
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" stroke="#c7d2fe" />

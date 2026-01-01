@@ -51,34 +51,32 @@ export default function WeakTopics({ topics }: WeakTopicsProps) {
         {weakTopics.map((topic, index) => (
           <div 
             key={`${topic.subject}-${index}`}
-            className="p-6 bg-orange-50 border border-orange-200 rounded-xl shadow-sm"
+            className="p-4 sm:p-6 bg-orange-50 border border-orange-200 rounded-xl shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
           >
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <h4 className="font-bold text-orange-700 capitalize flex items-center gap-3 text-lg">
-                  {topic.subject}
-                  <TrendingDown className="w-5 h-5 text-orange-500" />
-                </h4>
-                <p className="text-base text-orange-400 mt-2 font-semibold">
-                  {topic.attempts} attempts • Recent score: {topic.recentScore}%
-                </p>
+            <div className="flex-1">
+              <h4 className="font-bold text-orange-700 capitalize flex items-center gap-3 text-lg">
+                {topic.subject}
+                <TrendingDown className="w-5 h-5 text-orange-500" />
+              </h4>
+              <p className="text-base text-orange-400 mt-2 font-semibold">
+                {topic.attempts} attempts • Recent score: {topic.recentScore}%
+              </p>
+              <div className="w-full bg-orange-200 rounded-full h-4 my-4">
+                <div 
+                  className="bg-linear-to-r from-orange-400 to-orange-500 h-4 rounded-full transition-all duration-500 shadow-md"
+                  style={{ width: `${topic.mastery}%` }}
+                />
               </div>
-              <div className="text-right">
-                <p className="text-3xl font-extrabold text-orange-600">{topic.mastery}%</p>
-                <p className="text-sm text-orange-400 font-semibold">Mastery</p>
-              </div>
+              <Link href={`/notes?subject=${topic.subject}`}>
+                <Button size="sm" variant="outline" className="w-full rounded-xl bg-orange-100 text-orange-700 font-bold shadow hover:bg-orange-200">
+                  Practice {topic.subject}
+                </Button>
+              </Link>
             </div>
-            <div className="w-full bg-orange-200 rounded-full h-4 mb-4">
-              <div 
-                className="bg-linear-to-r from-orange-400 to-orange-500 h-4 rounded-full transition-all duration-500 shadow-md"
-                style={{ width: `${topic.mastery}%` }}
-              />
+            <div className="text-right shrink-0">
+              <p className="text-3xl font-extrabold text-orange-600">{topic.mastery}%</p>
+              <p className="text-sm text-orange-400 font-semibold">Mastery</p>
             </div>
-            <Link href={`/notes?subject=${topic.subject}`}>
-              <Button size="sm" variant="outline" className="w-full rounded-xl bg-orange-100 text-orange-700 font-bold shadow hover:bg-orange-200">
-                Practice {topic.subject}
-              </Button>
-            </Link>
           </div>
         ))}
       </CardContent>

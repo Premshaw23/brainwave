@@ -60,13 +60,13 @@ export default function LearningVelocity({ stats }: LearningVelocityProps) {
         <CardDescription className="text-indigo-400 font-semibold">Your study habits and pace analysis</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {metrics.map((metric) => {
             const Icon = metric.icon;
             return (
               <div 
                 key={metric.label}
-                className={`${metric.bgColor} rounded-xl p-6 shadow-md transition-all duration-150 hover:scale-[1.03]`}
+                className={`${metric.bgColor} rounded-xl p-6 shadow-md transition-all duration-150 hover:scale-[1.03] w-full`}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <Icon className={`w-7 h-7 ${metric.color} drop-shadow`} />

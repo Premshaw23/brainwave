@@ -71,15 +71,15 @@ export default function MasteryChart({ data }: MasteryChartProps) {
 
         <div className="mt-6 space-y-3">
           {data.map((item, index) => (
-            <div key={`${item.subject}-${index}`} className="flex items-center justify-between p-4 bg-indigo-50 rounded-xl shadow-sm">
-              <div className="flex items-center gap-4">
+            <div key={`${item.subject}-${index}`} className="flex flex-col sm:flex-row items-center justify-between p-4 bg-indigo-50 rounded-xl shadow-sm gap-2 sm:gap-0">
+              <div className="flex items-center gap-4 mb-2 sm:mb-0">
                 <div 
                   className="w-4 h-4 rounded-full shadow" 
                   style={{ backgroundColor: COLORS[index % COLORS.length] }}
                 />
                 <span className="text-base font-semibold capitalize text-indigo-700">{item.subject}</span>
               </div>
-              <div className="flex items-center gap-6 text-base">
+              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-base">
                 <span className="text-indigo-400 font-semibold">{item.attempts} attempts</span>
                 <span className="font-extrabold text-indigo-700">{item.mastery}%</span>
               </div>

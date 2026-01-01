@@ -58,14 +58,14 @@ export default function MemberList({ groupId, members, creatorId }: MemberListPr
   }, [socket, groupId]);
 
   return (
-    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200">
-      <CardHeader>
-        <CardTitle className="text-xl font-bold text-indigo-700 tracking-tight">
+    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-gray-200 p-2 sm:p-4">
+      <CardHeader className="pb-2 sm:pb-4">
+        <CardTitle className="text-lg sm:text-xl font-bold text-indigo-700 tracking-tight">
           Members ({members.length})
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
+      <CardContent className="p-0">
+        <div className="space-y-2 sm:space-y-4">
           {members.map((member) => {
             const isOnline = onlineUsers.has(member._id);
             const isCreator = member._id === creatorId;
@@ -73,37 +73,37 @@ export default function MemberList({ groupId, members, creatorId }: MemberListPr
             return (
               <div
                 key={member._id}
-                className="flex items-center gap-4 p-4 rounded-xl bg-white shadow-sm hover:bg-indigo-50 transition-all duration-150"
+                className="flex items-center gap-2 sm:gap-4 p-2 sm:p-4 rounded-xl bg-white shadow-sm hover:bg-indigo-50 transition-all duration-150"
               >
                 <div className="relative">
-                  <Avatar className="w-10 h-10 shadow-md">
+                  <Avatar className="w-9 h-9 sm:w-10 sm:h-10 shadow-md">
                     <AvatarImage src={member.avatar} />
                     <AvatarFallback>
                       {member.displayName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div
-                    className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                    className={`absolute bottom-0 right-0 w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border-2 border-white ${
                       isOnline ? 'bg-green-500' : 'bg-gray-300'
                     }`}
                   />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-base font-semibold text-gray-900 truncate">
+                  <div className="flex items-center gap-1 sm:gap-2">
+                    <p className="text-sm sm:text-base font-semibold text-gray-900 truncate">
                       {member.displayName}
                     </p>
                     {isCreator && (
-                      <Crown className="w-5 h-5 text-yellow-600" />
+                      <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600" />
                     )}
                   </div>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs sm:text-sm text-gray-500">
                     {member.totalXP.toLocaleString()} XP
                   </p>
                 </div>
 
-                <Badge variant={isOnline ? 'default' : 'outline'} className={`text-xs px-3 py-1 rounded-lg ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                <Badge variant={isOnline ? 'default' : 'outline'} className={`text-[10px] sm:text-xs px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg ${isOnline ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
                   {isOnline ? 'Online' : 'Offline'}
                 </Badge>
               </div>

@@ -63,19 +63,19 @@ export default function CreateGroupModal() {
           Create Group
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200">
+      <DialogContent className="w-full max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200 p-2 sm:p-6">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-indigo-700 tracking-tight">Create Study Group</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+        <form onSubmit={handleSubmit} className="space-y-6 pt-2 w-full">
           {error && (
             <Alert className="bg-red-50 border-red-200">
               <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
             </Alert>
           )}
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="name" className="text-lg font-medium text-gray-800">Group Name *</Label>
             <Input
               id="name"
@@ -88,7 +88,7 @@ export default function CreateGroupModal() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label htmlFor="description" className="text-lg font-medium text-gray-800">Description</Label>
             <Textarea
               id="description"
@@ -101,13 +101,13 @@ export default function CreateGroupModal() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <Label className="text-lg font-medium text-gray-800">Privacy</Label>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
               <button
                 type="button"
                 onClick={() => setIsPrivate(true)}
-                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm ${
+                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm w-full ${
                   isPrivate
                     ? 'border-indigo-600 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'
@@ -120,7 +120,7 @@ export default function CreateGroupModal() {
               <button
                 type="button"
                 onClick={() => setIsPrivate(false)}
-                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm ${
+                className={`flex-1 p-4 rounded-xl border-2 text-base font-semibold transition-colors shadow-sm w-full ${
                   !isPrivate
                     ? 'border-indigo-600 bg-indigo-50'
                     : 'border-gray-200 hover:border-gray-300'

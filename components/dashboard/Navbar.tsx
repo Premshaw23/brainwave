@@ -11,7 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 
-export default function Navbar() {
+export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const [user, setUser] = useState<any>(null);
   const { user: authUser } = useAuth();
   const [search, setSearch] = useState('');
@@ -144,7 +144,19 @@ export default function Navbar() {
   };
 
   return (
-    <div className="flex h-17 py-4 items-center justify-between border-b bg-linear-to-r from-indigo-50 via-white to-indigo-100 px-10 shadow-md">
+    <div className="flex h-17 py-4 items-center justify-between border-b bg-linear-to-r from-indigo-50 via-white to-indigo-100 px-5 shadow-md">
+      {/* Hamburger for mobile */}
+      <div className="md:hidden flex items-center mr-4">
+        {onMenuClick && (
+          <button
+            className="p-2 rounded-lg bg-indigo-500 text-white shadow-lg focus:outline-none"
+            onClick={onMenuClick}
+            aria-label="Open sidebar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+        )}
+      </div>
       {/* Search */}
       <div className="flex-1 max-w-xl">
         <div className="relative">
@@ -250,7 +262,7 @@ export default function Navbar() {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-4 ml-2">
         <NotificationBell />
         <div className="flex items-center gap-4">
           <Avatar className="w-12 h-12 shadow-md">

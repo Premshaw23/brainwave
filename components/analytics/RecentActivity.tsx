@@ -46,9 +46,9 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
             activities.map((activity, index) => (
               <div 
                 key={`${activity._id}-${activity.timestamp}-${index}`}
-                className="flex items-start gap-5 p-5 bg-indigo-50 rounded-xl shadow-sm hover:bg-indigo-100 transition-all duration-150"
+                className="flex flex-col sm:flex-row items-start gap-3 sm:gap-5 p-4 sm:p-5 bg-indigo-50 rounded-xl shadow-sm hover:bg-indigo-100 transition-all duration-150"
               >
-                <div className="mt-1">
+                <div className="mt-1 shrink-0">
                   {activity.type === 'quiz' ? (
                     activity.score && activity.score >= 70 ? (
                       <CheckCircle2 className="w-7 h-7 text-green-600" />
@@ -66,7 +66,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
                       {activity.title}
                     </h4>
                   </Link>
-                  <div className="flex items-center gap-3 mt-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mt-2">
                     <Badge variant="outline" className="text-sm capitalize px-3 py-1 font-semibold rounded-xl bg-indigo-100 text-indigo-700 border border-indigo-200">
                       {activity.subject}
                     </Badge>
@@ -78,7 +78,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-indigo-400 font-semibold">
+                <div className="flex items-center gap-2 text-sm text-indigo-400 font-semibold mt-2 sm:mt-0">
                   <Clock className="w-4 h-4" />
                   {formatTimeAgo(activity.timestamp)}
                 </div>

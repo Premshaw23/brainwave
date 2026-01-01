@@ -46,32 +46,32 @@ export default function Leaderboard() {
         <CardDescription className="text-indigo-400 font-semibold">Top learners on BrainWave</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-4 flex flex-col w-full">
           {leaderboard.map((user) => (
             <div
               key={user._id ? `${user._id}-${user.rank}` : `${user.rank}-${user.displayName}`}
-              className={`flex items-center gap-6 p-5 rounded-xl shadow-sm transition-all duration-150 ${
+              className={`flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-5 rounded-xl shadow-sm transition-all duration-150 ${
                 user.isCurrentUser
                   ? 'bg-indigo-100 border-2 border-indigo-300 scale-[1.03]'
                   : 'bg-white hover:bg-indigo-50'
               }`}
             >
-              <div className="flex items-center justify-center w-12">
+              <div className="flex items-center justify-center w-12 mb-2 sm:mb-0">
                 {getRankIcon(user.rank)}
               </div>
 
-              <Avatar className="w-12 h-12 shadow-md">
+              <Avatar className="w-12 h-12 shadow-md mb-2 sm:mb-0">
                 <AvatarImage src={user.avatar} />
                 <AvatarFallback className="bg-indigo-200 text-indigo-700 font-bold">
                   {user.displayName.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1">
-                <h4 className="font-bold text-indigo-700 text-lg flex items-center">
+              <div className="flex-1 text-center sm:text-left">
+                <h4 className="font-bold text-indigo-700 text-lg flex flex-col sm:flex-row items-center justify-center sm:justify-start">
                   {user.displayName}
                   {user.isCurrentUser && (
-                    <Badge className="ml-3 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-xl shadow">You</Badge>
+                    <Badge className="ml-0 sm:ml-3 mt-2 sm:mt-0 px-3 py-1 bg-indigo-600 text-white font-semibold rounded-xl shadow">You</Badge>
                   )}
                 </h4>
                 <p className="text-sm text-indigo-400 font-semibold">
@@ -79,7 +79,7 @@ export default function Leaderboard() {
                 </p>
               </div>
 
-              <div className="text-right">
+              <div className="text-center sm:text-right mt-2 sm:mt-0">
                 <p className="text-2xl font-extrabold text-indigo-700">
                   {user.totalXP.toLocaleString()}
                 </p>

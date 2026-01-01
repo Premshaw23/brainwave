@@ -64,17 +64,17 @@ export default function JoinGroupModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="rounded-xl font-semibold px-6 py-3 shadow-md hover:bg-indigo-50">
+        <Button variant="outline" className="rounded-xl font-semibold px-4 sm:px-6 py-2.5 sm:py-3 shadow-md hover:bg-indigo-50 text-base sm:text-lg">
           <LinkIcon className="w-5 h-5 mr-2" />
           Join Group
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200">
+      <DialogContent className="max-w-xs sm:max-w-md bg-linear-to-br from-white via-indigo-50 to-indigo-100 rounded-2xl shadow-2xl border border-gray-200 p-3 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-indigo-700 tracking-tight">Join Study Group</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl font-bold text-indigo-700 tracking-tight">Join Study Group</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 pt-2">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 pt-1 sm:pt-2">
           {error && (
             <Alert className="bg-red-50 border-red-200">
               <AlertDescription className="text-red-600 font-medium">{error}</AlertDescription>
@@ -89,8 +89,8 @@ export default function JoinGroupModal() {
             </Alert>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="inviteCode" className="text-lg font-medium text-gray-800">Invite Code</Label>
+          <div className="space-y-1.5 sm:space-y-2">
+            <Label htmlFor="inviteCode" className="text-base sm:text-lg font-medium text-gray-800">Invite Code</Label>
             <Input
               id="inviteCode"
               placeholder="e.g., ABC12XYZ"
@@ -98,15 +98,15 @@ export default function JoinGroupModal() {
               onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
               required
               disabled={loading}
-              className="font-mono text-lg tracking-wider rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+              className="font-mono text-base sm:text-lg tracking-wider rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 py-2 sm:py-2.5"
               maxLength={8}
             />
-            <p className="text-xs text-gray-500">
+            <p className="text-xs sm:text-sm text-gray-500">
               Enter the 8-character invite code shared by the group creator
             </p>
           </div>
 
-          <Button type="submit" className="w-full rounded-xl bg-indigo-600 text-white text-lg font-semibold py-3 shadow-lg hover:bg-indigo-700 transition-all duration-150" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl bg-indigo-600 text-white text-base sm:text-lg font-semibold py-2.5 sm:py-3 shadow-lg hover:bg-indigo-700 transition-all duration-150" disabled={loading}>
             {loading ? <AppLoader message="Joining group..." /> : 'Join Group'}
           </Button>
         </form>
