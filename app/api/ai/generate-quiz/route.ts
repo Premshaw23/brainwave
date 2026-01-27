@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate quiz using OpenAI
+    // Generate quiz using Gemini API
     const questions = await generateQuiz({
       content: note.content,
       difficulty,

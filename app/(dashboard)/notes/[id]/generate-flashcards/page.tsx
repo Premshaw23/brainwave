@@ -11,14 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 
-export default function GenerateFlashcardsPage({ params }: { params: Promise<{ id: string } >}) {
+export default function GenerateFlashcardsPage({ params }: { params: Promise<{ id: string }> }) {
   const { user } = useAuth();
   const router = useRouter();
   const [note, setNote] = useState<any>(null);
   const [numCards, setNumCards] = useState([10]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const {id}=use(params);
+  const { id } = use(params);
 
   useEffect(() => {
     fetchNote();
@@ -152,7 +152,7 @@ export default function GenerateFlashcardsPage({ params }: { params: Promise<{ i
           </Button>
 
           <p className="text-xs text-gray-500 text-center">
-            Powered by OpenAI GPT-4 • Takes ~10-15 seconds
+            Powered by Gemini API • Takes ~10-15 seconds
           </p>
         </CardContent>
       </Card>

@@ -25,7 +25,7 @@ Transform your notes into smart flashcards, adaptive quizzes, and personalized s
 
 | Frontend   | Backend         | Database      | Real-time   | AI         | Auth      | Deployment         |
 |------------|----------------|--------------|-------------|------------|-----------|--------------------|
-| Next.js 14 | Next.js API    | MongoDB Atlas| Socket.io   | OpenAI GPT | Firebase  | Vercel + Render    |
+| Next.js 14 | Next.js API    | MongoDB Atlas| Socket.io   | Gemini API | Firebase  | Vercel + Render    |
 | React 18   | Express.js     |              |             |            |           |                    |
 | TypeScript |                |              |             |            |           |                    |
 | TailwindCSS|                |              |             |            |           |                    |
@@ -61,7 +61,7 @@ npm run dev:all
 brainwave/
 ├── app/           # Next.js app router & API routes
 ├── components/    # UI and feature components
-├── lib/           # Utility libraries (firebase, openai, etc.)
+├── lib/           # Utility libraries (firebase, gemini, etc.)
 ├── models/        # Mongoose schemas
 ├── server/        # Socket.io server
 ├── types/         # TypeScript types
@@ -88,8 +88,8 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 FIREBASE_ADMIN_PROJECT_ID=
 FIREBASE_ADMIN_CLIENT_EMAIL=
 FIREBASE_ADMIN_PRIVATE_KEY=
-# OpenAI
-OPENAI_API_KEY=
+# Gemini
+GEMINI_API_KEY=
 # Socket.io
 NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 SOCKET_PORT=3001

@@ -155,7 +155,7 @@ export default function QuizGenerator({ noteId, noteTitle }: QuizGeneratorProps)
         </Button>
 
         <p className="text-xs text-gray-500 text-center">
-          Powered by OpenAI GPT-4 • Takes ~10-15 seconds
+          Powered by Gemini API • Takes ~10-15 seconds
         </p>
       </CardContent>
     </Card>

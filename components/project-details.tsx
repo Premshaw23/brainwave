@@ -80,11 +80,10 @@ const BrainWaveProject = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-all whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? "text-indigo-600 border-b-2 border-indigo-600"
-                      : "text-gray-600 hover:text-indigo-600"
-                  }`}
+                  className={`flex items-center gap-2 px-6 py-4 font-medium transition-all whitespace-nowrap ${activeTab === tab.id
+                    ? "text-indigo-600 border-b-2 border-indigo-600"
+                    : "text-gray-600 hover:text-indigo-600"
+                    }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
@@ -216,7 +215,7 @@ const FeaturesSection = () => (
           },
           {
             name: "AI Quiz Generation",
-            desc: "Generate MCQs with explanations using OpenAI API",
+            desc: "Generate MCQs with explanations using Gemini API",
             priority: "P0",
           },
           {
@@ -360,13 +359,12 @@ const FeaturesSection = () => (
                       {feature.name}
                     </h3>
                     <span
-                      className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        feature.priority === "P0"
-                          ? "bg-red-100 text-red-700"
-                          : feature.priority === "P1"
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${feature.priority === "P0"
+                        ? "bg-red-100 text-red-700"
+                        : feature.priority === "P1"
                           ? "bg-yellow-100 text-yellow-700"
                           : "bg-blue-100 text-blue-700"
-                      }`}
+                        }`}
                     >
                       {feature.priority}
                     </span>
@@ -514,7 +512,7 @@ const TechStackSection = () => (
           title: "🤖 AI & Services",
           items: [
             {
-              name: "OpenAI API",
+              name: "Gemini API",
               reason: "Quiz and flashcard generation",
               required: true,
             },
@@ -552,9 +550,8 @@ const TechStackSection = () => (
             {section.items.map((item, j) => (
               <div key={j} className="flex items-start gap-3">
                 <div
-                  className={`mt-1 w-2 h-2 rounded-full ${
-                    item.required ? "bg-green-500" : "bg-gray-400"
-                  }`}
+                  className={`mt-1 w-2 h-2 rounded-full ${item.required ? "bg-green-500" : "bg-gray-400"
+                    }`}
                 />
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
@@ -589,7 +586,7 @@ const TechStackSection = () => (
     "mongoose": "^8.0.0",
     "socket.io": "^4.6.0",
     "socket.io-client": "^4.6.0",
-    "openai": "^4.20.0",
+    "@google/generative-ai": "^0.24.1",
     "pdf-parse": "^1.1.1",
     "@tanstack/react-query": "^5.0.0",
     "recharts": "^2.10.0",
@@ -850,7 +847,7 @@ const RoadmapSection = () => (
         tasks: [
           { task: "Build note upload component (PDF + text)", time: "4h" },
           { task: "Integrate pdf-parse for text extraction", time: "3h" },
-          { task: "Create OpenAI API route for quiz generation", time: "4h" },
+          { task: "Create Gemini API route for quiz generation", time: "4h" },
           { task: "Build quiz display component", time: "5h" },
           { task: "Implement quiz taking flow with timer", time: "4h" },
           { task: "Save quiz attempts to database", time: "3h" },
@@ -1274,17 +1271,16 @@ const APISection = () => (
               >
                 <div className="bg-gray-50 px-4 py-3 flex items-center gap-3">
                   <span
-                    className={`px-3 py-1 rounded text-xs font-bold ${
-                      endpoint.method === "GET"
-                        ? "bg-blue-100 text-blue-700"
-                        : endpoint.method === "POST"
+                    className={`px-3 py-1 rounded text-xs font-bold ${endpoint.method === "GET"
+                      ? "bg-blue-100 text-blue-700"
+                      : endpoint.method === "POST"
                         ? "bg-green-100 text-green-700"
                         : endpoint.method === "PUT"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : endpoint.method === "DELETE"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-purple-100 text-purple-700"
-                    }`}
+                          ? "bg-yellow-100 text-yellow-700"
+                          : endpoint.method === "DELETE"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-purple-100 text-purple-700"
+                      }`}
                   >
                     {endpoint.method}
                   </span>
