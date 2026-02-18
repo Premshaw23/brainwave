@@ -1,9 +1,8 @@
-
 // components/analytics/MasteryChart.tsx
 'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { cn } from '@/lib/utils';
 
 interface MasteryChartProps {
   data: Array<{
@@ -13,80 +12,99 @@ interface MasteryChartProps {
   }>;
 }
 
-const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+const COLORS = [
+  'hsl(var(--primary))',
+  'hsl(var(--primary) / 0.8)',
+  'hsl(var(--primary) / 0.6)',
+  'hsl(var(--primary) / 0.4)',
+  'hsl(var(--primary) / 0.2)',
+];
 
-export default function MasteryChart({ data }: MasteryChartProps) {
+export default function MasteryChart({ data = [] }: MasteryChartProps) {
+  const chartData = (data || []).map(item => ({
+    name: (item.subject || 'Unknown').charAt(0).toUpperCase() + (item.subject || 'Unknown').slice(1),
+    value: item.mastery || 0,
+    attempts: item.attempts || 0,
+    subject: item.subject || 'Unknown',
+  }));
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="text-sm font-semibold text-gray-900 capitalize mb-1">
-            {payload[0].payload.subject}
+        <div className="bg-background/95 backdrop-blur-md p-4 border border-border/50 rounded-2xl shadow-2xl z-50">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">
+            {payload[0].payload.name}
           </p>
-          <p className="text-sm text-indigo-600">
-            Mastery: {payload[0].value}%
-          </p>
-          <p className="text-sm text-gray-600">
-            Attempts: {payload[0].payload.attempts}
-          </p>
+          <p className="text-lg font-black text-foreground">{payload[0].value}% Mastery</p>
+          <p className="text-[10px] font-bold text-muted-foreground uppercase mt-1">{payload[0].payload.attempts} sessions conducted</p>
         </div>
       );
     }
     return null;
   };
 
-  const chartData = data.map(item => ({
-    name: item.subject.charAt(0).toUpperCase() + item.subject.slice(1),
-    value: item.mastery,
-    attempts: item.attempts,
-    subject: item.subject,
-  }));
+  if (chartData.length === 0) {
+    return (
+      <div className="h-[280px] w-full flex items-center justify-center text-center p-8 bg-secondary/10 rounded-[2rem] border border-dashed border-border/50">
+        <div>
+          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground/30">Neural Map Depleted</p>
+          <p className="text-[9px] font-bold text-muted-foreground/20 uppercase mt-1">Acquire knowledge to generate metrics</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
-      <CardHeader>
-        <CardTitle className="text-indigo-700 font-extrabold text-2xl">Mastery by Subject</CardTitle>
-        <CardDescription className="text-indigo-400 font-semibold">Your expertise level across different topics</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={320}>
+    <div className="w-full h-full flex flex-col">
+      <div className="h-[280px] w-full relative">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">Cognitive</span>
+          <span className="text-2xl font-black text-foreground">INDEX</span>
+        </div>
+        <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={chartData}
               cx="50%"
               cy="50%"
-              labelLine={false}
-              label={({ name, value }) => `${name}: ${value}%`}
-              outerRadius={110}
-              fill="#8884d8"
+              innerRadius={70}
+              outerRadius={100}
+              paddingAngle={8}
               dataKey="value"
+              animationBegin={0}
+              animationDuration={1500}
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${entry.subject}-${index}`} fill={COLORS[index % COLORS.length]} />
+                <Cell
+                  key={`cell-${index}`}
+                  fill={COLORS[index % COLORS.length]}
+                  stroke="transparent"
+                  className="hover:opacity-80 transition-opacity cursor-pointer focus:outline-none"
+                />
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} />
           </PieChart>
         </ResponsiveContainer>
+      </div>
 
-        <div className="mt-6 space-y-3">
-          {data.map((item, index) => (
-            <div key={`${item.subject}-${index}`} className="flex flex-col sm:flex-row items-center justify-between p-4 bg-indigo-50 rounded-xl shadow-sm gap-2 sm:gap-0">
-              <div className="flex items-center gap-4 mb-2 sm:mb-0">
-                <div 
-                  className="w-4 h-4 rounded-full shadow" 
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                />
-                <span className="text-base font-semibold capitalize text-indigo-700">{item.subject}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-base">
-                <span className="text-indigo-400 font-semibold">{item.attempts} attempts</span>
-                <span className="font-extrabold text-indigo-700">{item.mastery}%</span>
-              </div>
+      <div className="mt-8 space-y-2">
+        {chartData.map((item, index) => (
+          <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-secondary/30 border border-transparent hover:border-border/50 hover:bg-secondary/50 transition-all group">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-2 h-2 rounded-full shadow-sm"
+                style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              />
+              <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors truncate max-w-[120px]">{item.name}</span>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black text-muted-foreground/40">{item.attempts} SESSIONS</span>
+              <span className="text-sm font-black text-foreground">{item.value}%</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

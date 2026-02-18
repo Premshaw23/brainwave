@@ -1,11 +1,9 @@
 // components/analytics/ProgressChart.tsx
 'use client';
 
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Share2 } from 'lucide-react';
-
 import { useState } from 'react';
 import ShareContentModal from '@/components/community/ShareContentModel';
 
@@ -17,13 +15,13 @@ interface ProgressChartProps {
   }>;
 }
 
-export default function ProgressChart({ data }: ProgressChartProps) {
+export default function ProgressChart({ data = [] }: ProgressChartProps) {
   const [dataModalOpen, setDataModalOpen] = useState(false);
   const [shareData, setShareData] = useState<string | null>(null);
 
   const handleDataShare = () => {
-    // Format chart data as a readable summary
-    const summary = data.map(d => `${d.date}: Score ${d.score}%, Quizzes ${d.quizzes}`).join('\n');
+    if (!data || data.length === 0) return;
+    const summary = data.map(d => `${d.date || 'unknown'}: Score ${d.score || 0}%, Quizzes ${d.quizzes || 0}`).join('\n');
     setShareData(summary);
     setDataModalOpen(true);
   };
@@ -31,81 +29,106 @@ export default function ProgressChart({ data }: ProgressChartProps) {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-          <p className="text-sm font-semibold text-gray-900 mb-1">
-            {payload[0].payload.date}
+        <div className="bg-background/95 backdrop-blur-md p-4 border border-border/50 rounded-2xl shadow-2xl z-50">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-2">
+            {payload[0].payload.date || 'Unknown Date'}
           </p>
-          <p className="text-sm text-indigo-600">
-            Avg Score: {payload[0].value}%
-          </p>
-          <p className="text-sm text-green-600">
-            Quizzes: {payload[1]?.value || 0}
-          </p>
+          <div className="space-y-1">
+            <p className="text-sm font-black text-primary flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary" />
+              Score: {payload[0].value || 0}%
+            </p>
+            <p className="text-sm font-black text-foreground flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+              Quizzes: {payload[1]?.value || 0}
+            </p>
+          </div>
         </div>
       );
     }
     return null;
   };
 
-  return (
-    <Card className="bg-linear-to-brrom-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
-      <CardHeader>
-        <CardTitle className="text-indigo-700 font-extrabold text-2xl">Performance Over Time</CardTitle>
-        <CardDescription className="text-indigo-400 font-semibold">Track your learning progress day by day</CardDescription>
-        <Button variant="outline" size="sm" className="mt-4 ml-2 rounded-xl bg-indigo-50 text-indigo-700 font-semibold shadow px-4 py-2" onClick={handleDataShare}>
-          <Share2 className="w-5 h-5 mr-2" />
-          Share Data
-        </Button>
-      </CardHeader>
-      <CardContent>
-        <div className="pt-2 w-full overflow-x-auto">
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#c7d2fe" />
-              <XAxis 
-                dataKey="date" 
-                stroke="#6366f1"
-                style={{ fontSize: '14px', fontWeight: 600 }}
-              />
-              <YAxis 
-                stroke="#6366f1"
-                style={{ fontSize: '14px', fontWeight: 600 }}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                wrapperStyle={{ fontSize: '16px', fontWeight: 700, color: '#6366f1' }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="score" 
-                stroke="#6366f1" 
-                strokeWidth={4}
-                name="Average Score (%)"
-                dot={{ fill: '#6366f1', r: 5 }}
-                activeDot={{ r: 8 }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="quizzes" 
-                stroke="#10b981" 
-                strokeWidth={3}
-                name="Quizzes Taken"
-                dot={{ fill: '#10b981', r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full h-full min-h-[300px] flex items-center justify-center text-center p-12 bg-secondary/5 border border-dashed border-border/50 rounded-[2.5rem]">
+        <div className="space-y-2">
+          <p className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground/40">Temporal Rift Detected</p>
+          <p className="text-[10px] font-bold text-muted-foreground/20 uppercase">Incomplete dataset for retention matrix</p>
         </div>
-        {shareData && (
-          <ShareContentModal
-            contentType="summary"
-            contentId={shareData}
-            contentTitle="Analytics Data Summary"
-            trigger={null}
-            open={dataModalOpen}
-            onOpenChange={setDataModalOpen}
-          />
-        )}
-      </CardContent>
-    </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full space-y-4">
+      <div className="h-[320px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <defs>
+              <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.1} />
+                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+            <XAxis
+              dataKey="date"
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 700 }}
+              dy={10}
+            />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10, fontWeight: 700 }}
+            />
+            <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'hsl(var(--primary))', strokeWidth: 1 }} />
+            <Area
+              type="monotone"
+              dataKey="score"
+              stroke="hsl(var(--primary))"
+              strokeWidth={3}
+              fillOpacity={1}
+              fill="url(#colorScore)"
+              animationDuration={2000}
+            />
+            <Line
+              type="monotone"
+              dataKey="quizzes"
+              stroke="hsl(var(--muted-foreground))"
+              strokeWidth={2}
+              strokeDasharray="5 5"
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="flex justify-end pt-4 border-t border-border/50">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="rounded-xl font-black text-[10px] uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-all disabled:opacity-30"
+          onClick={handleDataShare}
+          disabled={!data?.length}
+        >
+          <Share2 className="w-3 h-3 mr-2" />
+          Export Dataset
+        </Button>
+      </div>
+
+      {shareData && (
+        <ShareContentModal
+          contentType="summary"
+          contentId={shareData}
+          contentTitle="Performance Synthesis Record"
+          trigger={null}
+          open={dataModalOpen}
+          onOpenChange={setDataModalOpen}
+        />
+      )}
+    </div>
   );
 }

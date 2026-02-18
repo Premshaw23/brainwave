@@ -1,21 +1,21 @@
-
 // components/analytics/LearningVelocity.tsx
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { TrendingUp, Clock, Target, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LearningVelocityProps {
   stats: {
-    questionsPerDay: number;
-    averageTimePerQuiz: number;
-    improvementRate: number;
-    totalTimeSpent: number;
+    questionsPerDay?: number;
+    averageTimePerQuiz?: number;
+    improvementRate?: number;
+    totalTimeSpent?: number;
   };
 }
 
-export default function LearningVelocity({ stats }: LearningVelocityProps) {
-  const formatTime = (seconds: number) => {
+export default function LearningVelocity({ stats = {} }: LearningVelocityProps) {
+  const formatTime = (seconds: number = 0) => {
+    if (!seconds) return '0m';
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     if (hours > 0) return `${hours}h ${minutes}m`;
@@ -24,64 +24,63 @@ export default function LearningVelocity({ stats }: LearningVelocityProps) {
 
   const metrics = [
     {
-      label: 'Questions/Day',
-      value: stats.questionsPerDay.toFixed(1),
+      label: 'Absorption Rate',
+      value: `${(stats?.questionsPerDay || 0).toFixed(1)} Q/D`,
       icon: Target,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-blue-500',
+      description: 'Questions per day processed'
     },
     {
-      label: 'Avg Time/Quiz',
-      value: formatTime(stats.averageTimePerQuiz),
+      label: 'Session Pace',
+      value: formatTime(stats?.averageTimePerQuiz || 0),
       icon: Clock,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      color: 'text-emerald-500',
+      description: 'Average duration per quiz'
     },
     {
-      label: 'Improvement Rate',
-      value: `+${stats.improvementRate}%`,
+      label: 'Scaling Velocity',
+      value: `+${stats?.improvementRate || 0}%`,
       icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-primary',
+      description: 'Week-over-week growth'
     },
     {
-      label: 'Total Study Time',
-      value: formatTime(stats.totalTimeSpent),
+      label: 'Synthesis Time',
+      value: formatTime(stats?.totalTimeSpent || 0),
       icon: Zap,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      color: 'text-amber-500',
+      description: 'Cumulative cognitive load'
     },
   ];
 
   return (
-    <Card className="bg-linear-to-br from-white via-indigo-50 to-indigo-100 shadow-2xl rounded-2xl border border-indigo-100">
-      <CardHeader>
-        <CardTitle className="text-indigo-700 font-extrabold text-2xl">Learning Velocity</CardTitle>
-        <CardDescription className="text-indigo-400 font-semibold">Your study habits and pace analysis</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          {metrics.map((metric) => {
-            const Icon = metric.icon;
-            return (
-              <div 
-                key={metric.label}
-                className={`${metric.bgColor} rounded-xl p-6 shadow-md transition-all duration-150 hover:scale-[1.03] w-full`}
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <Icon className={`w-7 h-7 ${metric.color} drop-shadow`} />
-                  <span className="text-base font-semibold text-indigo-500">
-                    {metric.label}
-                  </span>
-                </div>
-                <p className={`text-3xl font-extrabold ${metric.color} drop-shadow`}> 
-                  {metric.value}
-                </p>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {metrics.map((metric, i) => {
+        const Icon = metric.icon;
+        return (
+          <div
+            key={i}
+            className="p-5 rounded-[1.5rem] bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-all group"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className={cn("p-2 rounded-xl bg-background shadow-sm group-hover:scale-110 transition-transform", metric.color)}>
+                <Icon className="w-4 h-4" />
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60 group-hover:text-muted-foreground transition-colors text-nowrap">
+                {metric.label}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <p className="text-2xl font-black text-foreground tracking-tight">
+                {metric.value}
+              </p>
+              <p className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-widest leading-none">
+                {metric.description}
+              </p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

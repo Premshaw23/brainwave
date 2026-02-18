@@ -1,15 +1,15 @@
-
 // components/dashboard/Navbar.tsx
 'use client';
 
-
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Search, X } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Bell, Search, X, Menu, Settings, User, Sparkles } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import NotificationBell from '@/components/NotificationBell';
 import { useAuth } from '../../context/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const [user, setUser] = useState<any>(null);
@@ -24,259 +24,159 @@ export default function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
 
   useEffect(() => {
     fetchUser();
-  }, []);
-
-  useEffect(() => {
-    if (search.trim().length > 0) {
-      handleSearch();
-    } else {
-      setResults([]);
-      setShowDropdown(false);
-    }
-    setHighlighted(-1);
-  }, [search]);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        inputRef.current &&
-        !inputRef.current.contains(e.target as Node)
-      ) {
-        setShowDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [authUser]);
 
   const fetchUser = async () => {
     if (!authUser) return;
-    const token = await authUser.getIdToken();
-    const response = await fetch('/api/auth/me', {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (response.ok) {
-      const data = await response.json();
-      setUser(data.user);
+    try {
+      const token = await authUser.getIdToken();
+      const response = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      }
+    } catch (e) {
+      console.error("Failed to fetch user profile:", e);
     }
   };
 
-  // Real search API: aggregate notes, quizzes, posts, flashcards
   const handleSearch = async () => {
+    if (!search.trim()) return;
     setLoading(true);
     if (!authUser) return;
-    const token = await authUser.getIdToken();
     try {
-      // Fetch notes
-      const notesRes = await fetch(`/api/notes?page=1&limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const token = await authUser.getIdToken();
+      // Simulating a more efficient search or just re-using the logic
+      // In a real app, this should be a single search endpoint
+      const res = await fetch(`/api/search?q=${encodeURIComponent(search)}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      const notesData = notesRes.ok ? await notesRes.json() : { notes: [] };
-      // Fetch quizzes
-      const quizzesRes = await fetch(`/api/quizzes?limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const quizzesData = quizzesRes.ok ? await quizzesRes.json() : { quizzes: [] };
-      // Fetch posts
-      const postsRes = await fetch(`/api/posts?page=1&limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const postsData = postsRes.ok ? await postsRes.json() : { posts: [] };
-      // Fetch flashcards
-      const flashcardsRes = await fetch(`/api/flashcards?limit=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const flashcardsData = flashcardsRes.ok ? await flashcardsRes.json() : { flashcards: [] };
-
-      // Map and filter results
-      const noteResults = (notesData.notes || [])
-        .filter((n: any) => n.title?.toLowerCase().includes(search.toLowerCase()))
-        .map((n: any) => ({
-          type: 'Note',
-          title: n.title,
-          href: `/notes/${n._id}`,
-        }));
-      const quizResults = (quizzesData.quizzes || [])
-        .filter((q: any) => q.title?.toLowerCase().includes(search.toLowerCase()))
-        .map((q: any) => ({
-          type: 'Quiz',
-          title: q.title,
-          href: `/quizzes/${q._id}`,
-        }));
-      const postResults = (postsData.posts || [])
-        .filter((p: any) => p.caption?.toLowerCase().includes(search.toLowerCase()))
-        .map((p: any) => ({
-          type: 'Post',
-          title: p.caption || 'Post',
-          href: `/community/${p._id}`,
-        }));
-      const flashcardResults = (flashcardsData.flashcards || [])
-        .filter((f: any) => f.title?.toLowerCase().includes(search.toLowerCase()))
-        .map((f: any) => ({
-          type: 'Flashcard',
-          title: f.title,
-          href: `/flashcards/${f._id}/study`,
-        }));
-
-      const allResults = [...noteResults, ...quizResults, ...flashcardResults, ...postResults];
-      setResults(allResults);
-      setShowDropdown(true);
+      if (res.ok) {
+        const data = await res.json();
+        setResults(data.results || []);
+      }
     } catch (err) {
       setResults([]);
-      setShowDropdown(true);
     } finally {
       setLoading(false);
+      setShowDropdown(true);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showDropdown || results.length === 0) return;
-    if (e.key === 'ArrowDown') {
-      setHighlighted((prev) => (prev < results.length - 1 ? prev + 1 : 0));
-    } else if (e.key === 'ArrowUp') {
-      setHighlighted((prev) => (prev > 0 ? prev - 1 : results.length - 1));
-    } else if (e.key === 'Enter' && highlighted >= 0) {
-      window.location.href = results[highlighted].href;
-      setShowDropdown(false);
-    }
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search.trim()) handleSearch();
+      else {
+        setResults([]);
+        setShowDropdown(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   return (
-    <div className="flex h-17 py-4 items-center justify-between border-b bg-linear-to-r from-indigo-50 via-white to-indigo-100 px-5 shadow-md">
-      {/* Hamburger for mobile */}
-      <div className="md:hidden flex items-center mr-4">
-        {onMenuClick && (
-          <button
-            className="p-2 rounded-lg bg-indigo-500 text-white shadow-lg focus:outline-none"
-            onClick={onMenuClick}
-            aria-label="Open sidebar"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-          </button>
-        )}
-      </div>
-      {/* Search */}
-      <div className="flex-1 max-w-xl">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-6 h-6 text-indigo-400 pointer-events-none" />
+    <header className="h-20 border-b border-border/50 bg-background/80 backdrop-blur-xl flex items-center px-6 lg:px-8 z-40 sticky top-0">
+      <div className="flex-1 flex items-center gap-4 sm:gap-8">
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden p-2 rounded-xl hover:bg-secondary transition-colors"
+        >
+          <Menu className="w-6 h-6 text-foreground" />
+        </button>
+
+        <div className="flex-1 max-w-2xl relative group">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 group-focus-within:text-primary transition-colors">
+            <Search className="w-5 h-5" />
+          </div>
           <Input
             ref={inputRef}
-            type="search"
-            placeholder="Search notes, quizzes..."
-            className="pl-14 pr-4 bg-white border border-indigo-200 focus:bg-indigo-50 focus:border-indigo-400 transition-colors shadow-lg h-12 rounded-2xl text-lg font-semibold"
+            placeholder="Search your neural network..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onFocus={() => search && setShowDropdown(true)}
-            onKeyDown={handleKeyDown}
-            autoComplete="off"
-            aria-label="Search notes, quizzes"
+            className="pl-12 h-12 bg-secondary/30 border-transparent hover:border-border/50 focus:border-primary/30 focus:bg-background rounded-2xl transition-all shadow-none"
           />
+
           {search && (
             <button
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-indigo-400 hover:text-indigo-600 p-2 rounded-full focus:outline-none bg-indigo-50 shadow-sm"
-              onClick={() => { setSearch(''); setShowDropdown(false); inputRef.current?.focus(); }}
-              tabIndex={-1}
-              aria-label="Clear search"
+              onClick={() => setSearch('')}
+              className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-secondary text-muted-foreground transition-colors"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           )}
-          {/* Dropdown */}
+
+          {/* Search Dropdown */}
           {showDropdown && (
-            <div
-              ref={dropdownRef}
-              className="absolute left-0 mt-3 w-full z-30"
-            >
-              <Card className="rounded-2xl border border-indigo-200 shadow-2xl bg-white p-0 overflow-hidden animate-fade-in">
-                {loading ? (
-                  <div className="p-8 flex flex-col items-center justify-center text-indigo-400 text-base font-semibold">
-                    <Search className="w-8 h-8 mb-3 animate-spin" />
-                    Searching...
-                  </div>
-                ) : results.length === 0 ? (
-                  <div className="p-8 flex flex-col items-center justify-center text-indigo-300 text-base font-semibold">
-                    <Search className="w-8 h-8 mb-3" />
-                    No results found
-                  </div>
-                ) : (
-                  <div>
-                    {/* Sectioned results */}
-                    {['Note', 'Quiz', 'Flashcard', 'Post'].map((section) => {
-                      const sectionResults = results.filter(r => r.type === section);
-                      if (sectionResults.length === 0) return null;
-                      return (
-                        <div key={section}>
-                          <div className="px-6 pt-6 pb-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                            {section === 'Note' && 'Notes'}
-                            {section === 'Quiz' && 'Quizzes'}
-                            {section === 'Flashcard' && 'Flashcards'}
-                            {section === 'Post' && 'Posts'}
-                          </div>
-                          <ul className="divide-y divide-indigo-100">
-                            {sectionResults.map((item, idx) => {
-                              // Calculate global index for highlight
-                              const globalIdx = results.findIndex(r => r === item);
-                              return (
-                                <li
-                                  key={item.href}
-                                  className={`flex items-center gap-4 px-6 py-4 cursor-pointer transition-colors ${
-                                    highlighted === globalIdx ? 'bg-indigo-100' : 'hover:bg-indigo-50'
-                                  } rounded-xl`}
-                                  onMouseEnter={() => setHighlighted(globalIdx)}
-                                  onMouseDown={() => { window.location.href = item.href; setShowDropdown(false); }}
-                                  tabIndex={-1}
-                                >
-                                  <span className={`inline-flex w-10 h-10 rounded-xl items-center justify-center text-xl font-bold shadow-sm ${
-                                    item.type === 'Note'
-                                      ? 'bg-green-100 text-green-600'
-                                      : item.type === 'Quiz'
-                                      ? 'bg-indigo-200 text-indigo-700'
-                                      : item.type === 'Flashcard'
-                                      ? 'bg-yellow-100 text-yellow-600'
-                                      : 'bg-pink-100 text-pink-600'
-                                  }`}>
-                                    {item.type === 'Note' && <span>📝</span>}
-                                    {item.type === 'Quiz' && <span>❓</span>}
-                                    {item.type === 'Flashcard' && <span>📇</span>}
-                                    {item.type === 'Post' && <span>💬</span>}
-                                  </span>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-indigo-700 text-base truncate">{item.title}</div>
-                                    <div className="text-xs text-indigo-400 font-semibold">{item.type}</div>
-                                  </div>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </Card>
+            <div className="absolute top-full left-0 right-0 mt-3 p-2 bg-background/95 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+              {loading ? (
+                <div className="p-8 text-center space-y-3">
+                  <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Indexing Knowledge...</p>
+                </div>
+              ) : results.length > 0 ? (
+                <div className="max-h-[60vh] overflow-y-auto space-y-1 p-1">
+                  {results.map((item, i) => (
+                    <button
+                      key={i}
+                      className="w-full flex items-center gap-4 p-3 rounded-xl hover:bg-secondary transition-all text-left group"
+                      onClick={() => { window.location.href = item.href; setShowDropdown(false); }}
+                    >
+                      <div className="w-10 h-10 rounded-lg bg-background flex items-center justify-center border border-border/50 group-hover:border-primary/30 transition-colors">
+                        <p className="text-lg">{(item.type === 'Note' && '📝') || (item.type === 'Quiz' && '❓') || '🧠'}</p>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-foreground line-clamp-1">{item.title}</p>
+                        <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">{item.type} • Cognitive Link</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">No matches in your synthesis</p>
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
-      {/* Right side */}
-      <div className="flex items-center gap-4 ml-2">
+      <div className="flex items-center gap-4 sm:gap-6 pl-6">
         <NotificationBell />
-        <div className="flex items-center gap-4">
-          <Avatar className="w-12 h-12 shadow-md">
-            <AvatarImage src={user?.avatar} />
-            <AvatarFallback className="bg-indigo-200 text-indigo-700 font-bold">
-              {user?.displayName?.charAt(0).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="hidden md:block">
-            <p className="text-lg font-bold text-indigo-700">{user?.displayName}</p>
-            <p className="text-sm text-indigo-400 font-semibold">{user?.email}</p>
+
+        <div className="h-8 w-px bg-border/50 hidden sm:block" />
+
+        <div className="flex items-center gap-3">
+          <div className="text-right hidden sm:block">
+            <p className="text-sm font-black text-foreground tracking-tight leading-none mb-1">
+              {user?.displayName || 'Active User'}
+            </p>
+            <div className="flex items-center justify-end gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+              <p className="text-[9px] font-black text-muted-foreground/60 uppercase tracking-widest">Neural Sync Active</p>
+            </div>
           </div>
+
+          <Avatar className="w-11 h-11 border-2 border-primary/20 rounded-full group cursor-pointer hover:border-primary/50 transition-all shadow-xl ring-offset-background ring-2 ring-transparent group-hover:ring-primary/10 overflow-hidden">
+            {user?.avatar ? (
+              <Image
+                src={user.avatar}
+                alt={user?.displayName || "User avatar"}
+                width={44}
+                height={44}
+                className="rounded-full object-cover w-full h-full transform transition-transform img-optimize"
+                priority
+              />
+            ) : (
+              <AvatarFallback className="bg-primary text-white font-black uppercase text-xs">
+                {user?.displayName?.charAt(0) || 'U'}
+              </AvatarFallback>
+            )}
+          </Avatar>
         </div>
       </div>
-    </div>
+    </header>
   );
 }

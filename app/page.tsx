@@ -99,7 +99,7 @@ export default function Home() {
         aria-label="Mobile navigation"
       >
         <div className="flex items-center gap-2 px-6 py-3.5 border-b bg-linear-to-r from-indigo-600 to-purple-600">
-          <Image src="/logo.png" alt="BrainWave Logo" width={36} height={36} className="rounded-xl bg-white p-1 border border-indigo-100 w-9 h-9" />
+          <Image src="/logo.png" alt="BrainWave Logo" width={36} height={36} className="rounded-xl bg-white p-1 border border-indigo-100 w-9 h-9 img-optimize" />
           <span className="text-xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-white to-indigo-200 tracking-tight">BrainWave</span>
         </div>
         <div className="flex flex-col gap-2 px-6 py-6 h-[calc(100%-80px)]">
@@ -112,7 +112,7 @@ export default function Home() {
           {user ? (
             <>
               <div className="flex flex-col items-center gap-2 bg-linear-to-r from-indigo-100 to-purple-100 rounded-xl px-3 py-4 border border-indigo-200 shadow mb-4">
-                <Image src={user.photoURL || '/avatar.jpg'} alt="User Avatar" width={56} height={56} className="rounded-full w-14 h-14 object-cover border-2 border-indigo-400" />
+                <Image src={user.photoURL || '/avatar.jpg'} alt="User Avatar" width={56} height={56} className="rounded-full w-14 h-14 object-cover border-2 border-indigo-400 img-optimize" />
                 <span className="text-lg font-bold text-indigo-900">{user.displayName || 'User'}</span>
                 <span className="text-xs font-medium text-gray-600">{user.email}</span>
               </div>
@@ -122,7 +122,7 @@ export default function Home() {
           ) : (
             <div className="mt-auto flex flex-col gap-2 pt-6">
               <button className="w-full text-gray-700 bg-white border border-gray-200 font-semibold px-4 py-3 rounded-xl transition-all hover:text-indigo-600" onClick={() => { setMobileNavOpen(false); }}>Login</button>
-              <button className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-semibold px-4 py-3 rounded-xl transition-all hover:scale-105" onClick={() => { setMobileNavOpen(false);}}>Get Started Free</button>
+              <button className="w-full bg-linear-to-r from-indigo-600 to-purple-600 text-white font-semibold px-4 py-3 rounded-xl transition-all hover:scale-105" onClick={() => { setMobileNavOpen(false); }}>Get Started Free</button>
             </div>
           )}
         </div>
@@ -138,9 +138,8 @@ export default function Home() {
         </button>
       </nav>
       {/* Header/Navbar at the top */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-xl shadow-lg' : 'bg-white/80 backdrop-blur-xl'
-      }`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-xl shadow-lg' : 'bg-white/80 backdrop-blur-xl'
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-between h-16 gap-y-2 relative">
             <div className="flex items-center gap-2 sm:gap-3 group cursor-pointer select-none">
@@ -150,7 +149,7 @@ export default function Home() {
                   alt="BrainWave Logo"
                   width={44}
                   height={44}
-                  className="rounded-xl shadow-md object-contain bg-white p-1 border border-indigo-100 group-hover:scale-105 transition-transform w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14"
+                  className="rounded-xl shadow-md object-contain bg-white p-1 border border-indigo-100 group-hover:scale-105 transition-transform w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 img-optimize"
                   priority
                 />
               </div>
@@ -177,16 +176,16 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                <Link href={"/login"}>
-                  <button className=" cursor-pointer text-gray-700 hover:text-indigo-600 font-semibold px-4 py-2 rounded-xl transition-all w-full md:w-auto">
-                    Login
-                  </button>
-                </Link>
-                <Link href={"/signup"}>
-                  <button className=" cursor-pointer bg-linear-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/50 transition-all transform hover:scale-105 w-full md:w-auto">
-                    Get Started Free
-                  </button>
-                </Link>
+                  <Link href={"/login"}>
+                    <button className=" cursor-pointer text-gray-700 hover:text-indigo-600 font-semibold px-4 py-2 rounded-xl transition-all w-full md:w-auto">
+                      Login
+                    </button>
+                  </Link>
+                  <Link href={"/signup"}>
+                    <button className=" cursor-pointer bg-linear-to-r from-indigo-600 to-purple-600 text-white px-4 py-2.5 rounded-xl font-semibold hover:shadow-lg hover:shadow-indigo-500/50 transition-all transform hover:scale-105 w-full md:w-auto">
+                      Get Started Free
+                    </button>
+                  </Link>
                 </>
               )}
             </div>
@@ -224,15 +223,15 @@ export default function Home() {
                 </span>
               </h1>
               <p className="text-xl lg:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
-                Transform your notes into smart flashcards, adaptive quizzes, and personalized study plans. 
+                Transform your notes into smart flashcards, adaptive quizzes, and personalized study plans.
                 Study smarter, not harder, with proven AI technology.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 w-full">
                 <Link href={"/dashboard"}>
-                <button className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                  Start Learning Free
-                  <ArrowRight className="w-5 h-5" />
-                </button>
+                  <button className="w-full sm:w-auto bg-linear-to-r from-indigo-600 to-purple-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-indigo-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    Start Learning Free
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
                 </Link>
                 <button className="w-full sm:w-auto bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all border-2 border-gray-200">
                   Watch Demo
@@ -267,100 +266,100 @@ export default function Home() {
             </div>
           </div>
         </section>
-         {/* How It Works */}
-      <section id="how-it-works" className="py-16 sm:py-24 lg:py-32">
-        <div className="max-w-7xl mx-auto px-8 sm:px-8 lg:px-8">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-4">
-              Your Learning Journey in
-              <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> 4 Steps</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              From upload to mastery, our AI handles the heavy lifting while you focus on learning
-            </p>
-          </div>
+        {/* How It Works */}
+        <section id="how-it-works" className="py-16 sm:py-24 lg:py-32">
+          <div className="max-w-7xl mx-auto px-8 sm:px-8 lg:px-8">
+            <div className="text-center mb-10 sm:mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+                Your Learning Journey in
+                <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> 4 Steps</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                From upload to mastery, our AI handles the heavy lifting while you focus on learning
+              </p>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {[
-              { icon: "📤", title: "Upload Content", desc: "Drop your notes, PDFs, or lecture slides", color: "from-blue-500 to-cyan-500" },
-              { icon: "🤖", title: "AI Processing", desc: "Advanced AI analyzes and structures content", color: "from-purple-500 to-pink-500" },
-              { icon: "📚", title: "Smart Materials", desc: "Get flashcards, quizzes, and summaries", color: "from-orange-500 to-red-500" },
-              { icon: "📈", title: "Track Progress", desc: "Monitor mastery and optimize learning", color: "from-green-500 to-emerald-500" }
-            ].map((step, idx) => (
-              <div key={idx} className="relative">
-                <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100">
-                  <div className={`w-16 h-16 bg-linear-to-br ${step.color} rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg`}>
-                    {step.icon}
-                  </div>
-                  <div className="absolute -top-4 -right-4 w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                    {idx + 1}
-                  </div>
-                  <h3 className="text-xl font-bold mb-3 text-gray-900">{step.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{step.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section id="features" className="py-16 sm:py-24 lg:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10 sm:mb-16">
-            <h2 className="text-4xl lg:text-5xl font-bold mb-4">
-              Everything You Need to
-              <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Excel</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Powerful features designed by educators and powered by AI
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {features.map((feature, idx) => (
-              <div 
-                key={idx}
-                className="group bg-linear-to-br from-gray-50 to-white rounded-2xl p-8 border-2 border-gray-100 hover:border-indigo-300 transition-all cursor-pointer hover:shadow-xl"
-                onMouseEnter={() => setActiveFeature(idx)}
-              >
-                <div className="flex items-start gap-6">
-                  <div className="shrink-0 w-14 h-14 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-lg">
-                    {feature.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold mb-3 text-gray-900">{feature.title}</h3>
-                    <p className="text-gray-600 leading-relaxed mb-4">{feature.description}</p>
-                    {idx === 0 && (
-                      <a href="/flashcards" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
-                        Learn more <ArrowRight className="w-4 h-4" />
-                      </a>
-                    )}
-                    {idx === 1 && (
-                      <a href="/analytics" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
-                        Learn more <ArrowRight className="w-4 h-4" />
-                      </a>
-                    )}
-                    {idx === 2 && (
-                      <a href="/groups" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
-                        Learn more <ArrowRight className="w-4 h-4" />
-                      </a>
-                    )}
-                    {idx === 3 && (
-                      <a href="/quizzes" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
-                        Learn more <ArrowRight className="w-4 h-4" />
-                      </a>
-                    )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+              {[
+                { icon: "📤", title: "Upload Content", desc: "Drop your notes, PDFs, or lecture slides", color: "from-blue-500 to-cyan-500" },
+                { icon: "🤖", title: "AI Processing", desc: "Advanced AI analyzes and structures content", color: "from-purple-500 to-pink-500" },
+                { icon: "📚", title: "Smart Materials", desc: "Get flashcards, quizzes, and summaries", color: "from-orange-500 to-red-500" },
+                { icon: "📈", title: "Track Progress", desc: "Monitor mastery and optimize learning", color: "from-green-500 to-emerald-500" }
+              ].map((step, idx) => (
+                <div key={idx} className="relative">
+                  <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-2 border border-gray-100">
+                    <div className={`w-16 h-16 bg-linear-to-br ${step.color} rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-lg`}>
+                      {step.icon}
+                    </div>
+                    <div className="absolute -top-4 -right-4 w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                      {idx + 1}
+                    </div>
+                    <h3 className="text-xl font-bold mb-3 text-gray-900">{step.title}</h3>
+                    <p className="text-gray-600 leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Testimonials */}
-      {/* <section id="testimonials" className="py-16 sm:py-24 lg:py-32 bg-linear-to-br from-indigo-50 to-purple-50">
+        {/* Features Grid */}
+        <section id="features" className="py-16 sm:py-24 lg:py-32 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-10 sm:mb-16">
+              <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+                Everything You Need to
+                <span className="bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> Excel</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Powerful features designed by educators and powered by AI
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {features.map((feature, idx) => (
+                <div
+                  key={idx}
+                  className="group bg-linear-to-br from-gray-50 to-white rounded-2xl p-8 border-2 border-gray-100 hover:border-indigo-300 transition-all cursor-pointer hover:shadow-xl"
+                  onMouseEnter={() => setActiveFeature(idx)}
+                >
+                  <div className="flex items-start gap-6">
+                    <div className="shrink-0 w-14 h-14 bg-linear-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-lg">
+                      {feature.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold mb-3 text-gray-900">{feature.title}</h3>
+                      <p className="text-gray-600 leading-relaxed mb-4">{feature.description}</p>
+                      {idx === 0 && (
+                        <a href="/flashcards" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
+                          Learn more <ArrowRight className="w-4 h-4" />
+                        </a>
+                      )}
+                      {idx === 1 && (
+                        <a href="/analytics" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
+                          Learn more <ArrowRight className="w-4 h-4" />
+                        </a>
+                      )}
+                      {idx === 2 && (
+                        <a href="/groups" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
+                          Learn more <ArrowRight className="w-4 h-4" />
+                        </a>
+                      )}
+                      {idx === 3 && (
+                        <a href="/quizzes" className="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:gap-3 transition-all">
+                          Learn more <ArrowRight className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        {/* <section id="testimonials" className="py-16 sm:py-24 lg:py-32 bg-linear-to-br from-indigo-50 to-purple-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10 sm:mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold mb-4">
@@ -398,25 +397,25 @@ export default function Home() {
         </div>
       </section> */}
 
-      {/* CTA */}
-      <section className="py-16 sm:py-24 lg:py-32 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-size-[20px_20px]"></div>
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-            Ready to Transform Your Learning?
-          </h2>
-          <p className="text-xl text-indigo-100 mb-10">
-            Join 50,000+ students who are already learning smarter with BrainWave
-          </p>
-          <Link href={"/dashboard"}>
-          <button className="bg-white text-indigo-600 px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl transition-all transform hover:scale-105 inline-flex items-center gap-3">
-            Start Free Trial
-            <ArrowRight className="w-5 h-5" />
-          </button>
-          </Link>
-          <p className="text-indigo-100 mt-6 text-sm">No credit card required • 14-day free trial • Cancel anytime</p>
-        </div>
-      </section>
+        {/* CTA */}
+        <section className="py-16 sm:py-24 lg:py-32 bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-white/[0.05] bg-size-[20px_20px]"></div>
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+              Ready to Transform Your Learning?
+            </h2>
+            <p className="text-xl text-indigo-100 mb-10">
+              Join 50,000+ students who are already learning smarter with BrainWave
+            </p>
+            <Link href={"/dashboard"}>
+              <button className="bg-white text-indigo-600 px-10 py-5 rounded-xl font-bold text-lg hover:shadow-2xl transition-all transform hover:scale-105 inline-flex items-center gap-3">
+                Start Free Trial
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </Link>
+            <p className="text-indigo-100 mt-6 text-sm">No credit card required • 14-day free trial • Cancel anytime</p>
+          </div>
+        </section>
         {/* Footer */}
         <footer className="bg-gray-900 text-gray-400 py-8 sm:py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
