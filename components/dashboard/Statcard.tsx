@@ -8,7 +8,7 @@ interface StatsCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
-  trend?: {
+  trend?: string | {
     value: string;
     isUp: boolean;
   };
@@ -46,10 +46,16 @@ export default function StatsCard({
               {trend && (
                 <div className={cn(
                   "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider",
-                  trend.isUp ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                  typeof trend === 'string'
+                    ? "bg-primary/10 text-primary border border-primary/20"
+                    : trend.isUp
+                      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                      : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
                 )}>
                   <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  {trend.isUp ? "+" : "-"}{trend.value} this week
+                  {typeof trend === 'string'
+                    ? trend
+                    : `${trend.isUp ? "+" : "-"}${trend.value} this week`}
                 </div>
               )}
             </div>
