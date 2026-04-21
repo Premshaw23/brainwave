@@ -18,7 +18,6 @@ Transform your notes into smart flashcards, adaptive quizzes, and personalized s
 - **Community Sharing**: Discover and share study materials with others.
 - **Gamification**: Earn XP, climb leaderboards, and maintain daily streaks.
 - **Secure Authentication**: Login with email or Google via Firebase.
-
 ---
 
 ## 🖥️ Tech Stack
